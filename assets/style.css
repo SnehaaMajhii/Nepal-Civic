@@ -1,0 +1,423 @@
+/* =========================================
+   NEPAL CIVIC - MASTER STYLESHEET
+   Theme: Nepal Flag (Crimson Red & Dark Blue)
+   ========================================= */
+
+/* --- 1. GENERAL RESET & TYPOGRAPHY --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; /* Very light grey background */
+    color: #333;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: #003893; /* Nepal Blue for links */
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #C41E3A; /* Red on hover */
+    text-decoration: none;
+}
+
+/* --- HEADER SPECIFIC STYLES --- */
+
+.nav-brand-link {
+    color: white; 
+    text-decoration: none; 
+    display: flex; 
+    align-items: center;
+}
+
+.nav-brand-link:hover {
+    color: #e0e0e0;
+    text-decoration: none;
+}
+
+.btn-logout {
+    margin-left: 15px;
+}
+
+.nav-register-btn {
+    margin-left: 10px; 
+    color: #ffcccc;
+}
+
+.nav-register-btn:hover {
+    color: white;
+}
+
+/* Notification Alert Button (Yellow Badge) */
+.nav-alert {
+    background-color: #ffc107; /* Warning Yellow */
+    color: #333 !important;    /* Dark text */
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-left: 5px;
+    transition: background 0.3s, color 0.3s;
+}
+
+.nav-alert:hover {
+    background-color: #e0a800; /* Darker Yellow */
+    text-decoration: none;
+    color: black !important;
+}
+
+/* --- 2. NAVIGATION BAR --- */
+.navbar {
+    background-color: #C41E3A; /* Nepal Crimson Red */
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    margin-bottom: 30px;
+    border-bottom: 5px solid #003893; /* Nepal Blue Border */
+}
+
+.nav-logo {
+    height: 40px; 
+    vertical-align: middle; 
+    margin-right: 10px;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+}
+
+.nav-links a {
+    margin-left: 20px;
+    font-weight: 500;
+    color: #ffffff;
+    opacity: 0.9;
+}
+
+.nav-links a:hover {
+    opacity: 1;
+}
+
+/* Special white outline button for Login in navbar */
+.nav-login-btn {
+    color: white !important;
+    font-weight: bold;
+    padding: 8px 15px;
+    border: 1px solid white;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.nav-login-btn:hover {
+    background: white;
+    color: #C41E3A !important;
+}
+
+.btn-logout {
+    background-color: #003893;
+    padding: 5px 15px;
+    border-radius: 4px;
+    color: white !important;
+    font-size: 0.9rem;
+}
+
+/* --- 3. LAYOUT CONTAINERS --- */
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- 4. FORMS (Login, Register, Report) --- */
+.login-box, .form-box, .form-card {
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    max-width: 500px;
+    margin: 40px auto; 
+    border-top: 5px solid #C41E3A; /* Red top accent */
+}
+
+.form-card {
+    max-width: 800px; /* Wider for reporting issues */
+}
+
+h1, h2, h3 {
+    color: #C41E3A;
+    margin-bottom: 20px;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 20px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #003893;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 56, 147, 0.2);
+}
+
+label {
+    font-weight: 600;
+    color: #444;
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* --- 5. BUTTONS --- */
+button, .btn-primary {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #C41E3A;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    transition: background 0.3s;
+}
+
+button:hover, .btn-primary:hover {
+    background-color: #a01830;
+    color: white;
+}
+
+.btn-report {
+    background-color: #28a745; /* Green for "Go" actions */
+    color: white !important;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.btn-report:hover {
+    background-color: #218838;
+}
+
+/* --- 6. HOMEPAGE HERO SECTION --- */
+.hero {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-bottom: 5px solid #003893;
+    margin-bottom: 40px;
+}
+
+.hero-logo {
+    height: 120px;
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    color: #C41E3A;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #555;
+    max-width: 600px;
+    margin: 0 auto 40px auto;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-large {
+    padding: 15px 35px;
+    font-size: 1.1rem;
+    border-radius: 50px; /* Pill shape */
+    text-decoration: none;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-large:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    text-decoration: none;
+}
+
+.btn-red {
+    background-color: #C41E3A;
+    color: white;
+    border: 2px solid #C41E3A;
+}
+
+.btn-blue {
+    background-color: white;
+    color: #003893;
+    border: 2px solid #003893;
+}
+
+.btn-blue:hover {
+    background-color: #003893;
+    color: white;
+}
+
+/* --- 7. FEATURE CARDS (Homepage) --- */
+.features {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 60px;
+    flex-wrap: wrap;
+}
+
+.feature-card {
+    flex: 1;
+    min-width: 250px;
+    background: white;
+    padding: 30px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    text-align: center;
+    border-top: 5px solid #C41E3A;
+    transition: transform 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-card h3 {
+    color: #003893;
+    font-size: 1.5rem;
+}
+
+/* --- 8. DASHBOARD TABLES --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    margin-top: 20px;
+    border: 1px solid #eee;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    background-color: #003893;
+    color: #ffffff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* --- 9. FEED & STATUS STYLES --- */
+.feed-controls {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.issue-card {
+    background: white;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border-left: 6px solid #ccc;
+    transition: box-shadow 0.2s;
+}
+
+.issue-card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Status Colors (Text & Borders) */
+.status-Pending { color: #d97706; font-weight: bold; } /* Orange */
+.status-In { color: #003893; font-weight: bold; }      /* Blue */
+.status-Resolved { color: #15803d; font-weight: bold; } /* Green */
+.status-Rejected { color: #C41E3A; font-weight: bold; } /* Red */
+
+.card-Pending { border-left-color: #d97706; }
+.card-In { border-left-color: #003893; }
+.card-Resolved { border-left-color: #15803d; }
+.card-Rejected { border-left-color: #C41E3A; }
+
+.meta-info {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.ward-badge { 
+    background: #e9ecef; 
+    padding: 3px 8px; 
+    border-radius: 4px; 
+    font-weight: bold; 
+    color: #495057;
+    font-size: 0.85rem;
+}
+
+/* --- 10. MESSAGES --- */
+.error-msg, .error {
+    color: #721c24;
+    background: #f8d7da;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border-left: 5px solid #C41E3A;
+}
+
+/* Footer */
+.main-footer {
+    text-align: center;
+    padding: 30px;
+    background-color: #343a40;
+    color: #ced4da;
+    font-size: 0.9rem;
+    margin-top: 60px;
+    border-top: 5px solid #C41E3A;
+}
+
