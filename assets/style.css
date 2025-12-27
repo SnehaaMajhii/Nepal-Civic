@@ -143,6 +143,29 @@ a:hover {
     padding: 0 20px;
 }
 
+/* Inline Validation Styles */
+.input-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.val-error {
+    color: #C41E3A; /* Nepal Red */
+    font-size: 0.75rem;
+    margin-top: 4px;
+    height: 14px; /* Prevents layout jumping */
+}
+
+input:focus {
+    outline: none;
+    border-color: #003893; /* Nepal Blue */
+}
+
+.error-msg {
+    transition: opacity 0.5s ease;
+}
+
 /* --- 4. FORMS (Login, Register, Report) --- */
 .login-box, .form-box, .form-card {
     background: white;

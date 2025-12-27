@@ -12,64 +12,86 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $ward_no = intval($_POST['ward_no']);
     $address = trim($_POST['address']);
 
-    $check = $conn->prepare("SELECT email FROM citizens WHERE email = ?");
-    $check->bind_param("s", $email);
-    $check->execute();
-    
-    if ($check->get_result()->num_rows > 0) {
-        $message = "Email already registered!";
+    // PHP Backend Validation (Security Layer)
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $message = "Invalid email format.";
+    } elseif (strlen($password) < 8) {
+        $message = "Password too short.";
     } else {
-        $sql = "INSERT INTO citizens (name, email, password, national_id, ward_no, address) VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssis", $name, $email, $password, $national_id, $ward_no, $address);
-
-        if ($stmt->execute()) {
-            header("Location: login.php");
-            exit();
+        $check = $conn->prepare("SELECT email FROM citizens WHERE email = ?");
+        $check->bind_param("s", $email);
+        $check->execute();
+        
+        if ($check->get_result()->num_rows > 0) {
+            $message = "Email already registered!";
         } else {
-            $message = "Error: " . $conn->error;
+            $sql = "INSERT INTO citizens (name, email, password, national_id, ward_no, address) VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ssssis", $name, $email, $password, $national_id, $ward_no, $address);
+
+            if ($stmt->execute()) {
+                header("Location: login.php?msg=registered");
+                exit();
+            } else {
+                $message = "Error: " . $conn->error;
+            }
         }
     }
 }
 
-// VIEW
-$page_title = "Register - Nepal Civic";
+$page_title = "Citizen Registration - Nepal Civic";
 include 'includes/header.php';
 ?>
 
 <div class="container">
-    <div class="form-box" style="max-width: 600px;">
-        <h2 style="text-align: center;">Citizen Registration</h2>
-        <?php if ($message): ?> <p class="error-msg"><?php echo $message; ?></p> <?php endif; ?>
+    <div class="form-box" style="max-width: 600px; margin: 40px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="text-align: center; color: #003893;">Citizen Registration</h2>
+        <p style="text-align: center; color: #666; margin-bottom: 20px;">Create an account to report issues in your ward.</p>
+        
+        <?php if ($message): ?> <p class="error-msg" style="color: red; text-align: center;"><?php echo $message; ?></p> <?php endif; ?>
 
-        <form method="POST" action="">
-            <label>Full Name</label>
-            <input type="text" name="name" required>
+        <form id="registrationForm" method="POST" action="register.php" novalidate>
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" name="name" required>
+                <span class="val-error" id="name-err"></span>
+            </div>
 
-            <label>Email Address</label>
-            <input type="email" name="email" required>
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" name="email" required>
+                <span class="val-error" id="email-err"></span>
+            </div>
 
-            <label>Password</label>
-            <input type="password" name="password" required>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" required>
+                <span class="val-error" id="pass-err"></span>
+            </div>
 
             <div style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label>National ID No.</label>
-                    <input type="text" name="national_id" required>
+                <div class="input-group" style="flex: 1;">
+                    <label>National ID (Citizenship)</label>
+                    <input type="text" name="national_id" placeholder="e.g. 12-34-56-789" required>
+                    <span class="val-error" id="id-err"></span>
                 </div>
-                <div style="flex: 1;">
+                <div class="input-group" style="flex: 1;">
                     <label>Ward Number</label>
-                    <input type="number" name="ward_no" placeholder="e.g. 5" min="1" max="32" required>
+                    <input type="number" name="ward_no" min="1" max="32" required>
+                    <span class="val-error" id="ward-err"></span>
                 </div>
             </div>
 
-            <label>Address (Tole/Street)</label>
-            <input type="text" name="address" placeholder="e.g. Main Road" required>
+            <div class="input-group">
+                <label>Address (Tole/Street)</label>
+                <input type="text" name="address" required>
+                <span class="val-error" id="addr-err"></span>
+            </div>
 
-            <button type="submit" class="btn-primary">Register</button>
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Register Account</button>
         </form>
         <p style="text-align: center; margin-top: 15px;">
-            Already have an account? <a href="login.php">Login here</a>
+            Already registered? <a href="login.php">Login here</a>
         </p>
     </div>
 </div>
