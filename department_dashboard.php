@@ -1,119 +1,94 @@
 <?php
-// department_dashboard.php
 include 'includes/db.php';
 
-// Security Check
+// Security: Only Ward Officers (Managers) allowed
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'manager') {
     header("Location: login.php");
     exit();
 }
 
-$manager_id = $_SESSION['user_id'];
-$dept_id = $_SESSION['dept_id'];
 $ward_no = $_SESSION['ward_no'];
-$message = "";
+$success_msg = "";
 
-// --- HANDLE STATUS UPDATE ---
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_issue_id'])) {
-    $issue_id = $_POST['update_issue_id'];
+// --- HANDLE STATUS UPDATES ---
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_status'])) {
+    $issue_id = intval($_POST['issue_id']);
     $new_status = $_POST['new_status'];
-    
-    $resolved_date = ($new_status == 'Resolved') ? date('Y-m-d H:i:s') : NULL;
 
-    // Update the Issue Table
-    $sql = "UPDATE issues SET status = ?, resolved_date = ? 
-            WHERE issue_id = ? AND dept_id = ? AND ward_no = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssiii", $new_status, $resolved_date, $issue_id, $dept_id, $ward_no);
+    // 1. Update the issue status in the database
+    $stmt = $conn->prepare("UPDATE issues SET status = ? WHERE issue_id = ? AND ward_no = ?");
+    $stmt->bind_param("sii", $new_status, $issue_id, $ward_no);
     
     if ($stmt->execute()) {
-        $message = "Status updated to $new_status.";
-
-        // --- NOTIFICATION LOGIC ---
-        $find_cit = $conn->prepare("SELECT citizen_id, title FROM issues WHERE issue_id = ?");
-        $find_cit->bind_param("i", $issue_id);
-        $find_cit->execute();
-        $issue_data = $find_cit->get_result()->fetch_assoc();
+        // 2. Fetch Citizen ID to send them a notification alert
+        $res = $conn->query("SELECT citizen_id, title FROM issues WHERE issue_id = $issue_id");
+        $issue_data = $res->fetch_assoc();
+        $c_id = $issue_data['citizen_id'];
+        $title = $issue_data['title'];
         
-        $cit_id = $issue_data['citizen_id'];
-        $title_snippet = substr($issue_data['title'], 0, 20) . "...";
-
-        if ($cit_id) {
-            $notif_msg = "Update: Your issue '$title_snippet' is now $new_status.";
-            $notif_sql = "INSERT INTO notifications (message, user_id, user_type) VALUES (?, ?, 'citizen')";
-            $n_stmt = $conn->prepare($notif_sql);
-            $n_stmt->bind_param("si", $notif_msg, $cit_id);
-            $n_stmt->execute();
-        }
+        $msg = "Ward Update: Your report on '$title' is now $new_status.";
+        $conn->query("INSERT INTO notifications (message, user_id, user_type) VALUES ('$msg', $c_id, 'citizen')");
+        
+        $success_msg = "Status updated and citizen notified!";
     }
 }
 
-// --- FETCH ISSUES (Filtered by Dept, Ward, and Approval Status) ---
-$sql = "SELECT issues.*, citizens.name AS citizen_name 
+// --- FETCH ALL WARD ISSUES ---
+$sql = "SELECT issues.*, departments.name as dept_name, citizens.name as c_name 
         FROM issues 
+        JOIN departments ON issues.dept_id = departments.dept_id 
         JOIN citizens ON issues.citizen_id = citizens.citizen_id 
-        WHERE issues.dept_id = ? 
-          AND issues.ward_no = ? 
-          AND issues.status != 'Pending Approval' 
-        ORDER BY FIELD(status, 'In Progress', 'Pending', 'Resolved', 'Rejected'), date_reported DESC";
-
+        WHERE issues.ward_no = ? AND issues.status != 'Pending Approval'
+        ORDER BY issues.date_reported DESC";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ii", $dept_id, $ward_no);
+$stmt->bind_param("i", $ward_no);
 $stmt->execute();
 $result = $stmt->get_result();
 
-$page_title = "Ward $ward_no Manager Dashboard";
+$page_title = "Ward $ward_no Officer Dashboard";
 include 'includes/header.php';
 ?>
 
 <div class="container">
-    <h2>Ward <?php echo $ward_no; ?>: Manage Requests</h2>
-    
-    <?php if ($message): ?> 
-        <p class="error-msg" style="background:#d4edda; color:#155724; border-color:#c3e6cb;"><?php echo $message; ?></p> 
-    <?php endif; ?>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Ward <?php echo $ward_no; ?> Oversight</h2>
+        <?php if($success_msg): ?> <span style="color: green; font-weight: bold;"><?php echo $success_msg; ?></span> <?php endif; ?>
+    </div>
 
-    <?php if ($result->num_rows > 0): ?>
+    <div class="form-card">
         <table>
             <thead>
                 <tr>
+                    <th>Category</th>
                     <th>Issue Details</th>
                     <th>Citizen</th>
                     <th>Status</th>
-                    <th>Action</th>
+                    <th>Update</th>
                 </tr>
             </thead>
             <tbody>
                 <?php while ($row = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td>
-                            <strong><?php echo htmlspecialchars($row['title']); ?></strong><br>
-                            <small><?php echo htmlspecialchars($row['description']); ?></small>
-                            <?php if($row['photo_url']): ?>
-                                <br><a href="<?php echo $row['photo_url']; ?>" target="_blank" style="font-size: 0.8rem;">View Evidence Photo</a>
-                            <?php endif; ?>
-                        </td>
-                        <td><?php echo htmlspecialchars($row['citizen_name']); ?></td>
-                        <td class="status-<?php echo $row['status']; ?>"><?php echo $row['status']; ?></td>
-                        <td>
-                            <form method="POST" style="display:flex; gap:5px;">
-                                <input type="hidden" name="update_issue_id" value="<?php echo $row['issue_id']; ?>">
-                                <select name="new_status" style="padding:5px; width:auto; margin:0;">
-                                    <option value="Pending" <?php if($row['status']=='Pending') echo 'selected';?>>Pending</option>
-                                    <option value="In Progress" <?php if($row['status']=='In Progress') echo 'selected';?>>In Progress</option>
-                                    <option value="Resolved" <?php if($row['status']=='Resolved') echo 'selected';?>>Resolved</option>
-                                    <option value="Rejected" <?php if($row['status']=='Rejected') echo 'selected';?>>Reject</option>
-                                </select>
-                                <button type="submit" class="btn-primary" style="width:auto; padding:5px 10px; margin:0;">Update</button>
-                            </form>
-                        </td>
-                    </tr>
+                <tr>
+                    <td><strong><?php echo htmlspecialchars($row['dept_name']); ?></strong></td>
+                    <td><strong><?php echo htmlspecialchars($row['title']); ?></strong></td>
+                    <td><?php echo htmlspecialchars($row['c_name']); ?></td>
+                    <td><span class="status-<?php echo str_replace(' ', '', $row['status']); ?>"><?php echo $row['status']; ?></span></td>
+                    <td>
+                        <form method="POST" style="display:flex; gap:5px;">
+                            <input type="hidden" name="issue_id" value="<?php echo $row['issue_id']; ?>">
+                            <select name="new_status" style="padding: 5px;">
+                                <option value="Pending" <?php if($row['status']=='Pending') echo 'selected';?>>Received</option>
+                                <option value="In Progress" <?php if($row['status']=='In Progress') echo 'selected';?>>In Progress</option>
+                                <option value="Resolved" <?php if($row['status']=='Resolved') echo 'selected';?>>Resolved</option>
+                            </select>
+                            <button type="submit" name="update_status" class="btn-primary" style="padding: 5px 10px;">Save</button>
+                        </form>
+                    </td>
+                </tr>
                 <?php endwhile; ?>
             </tbody>
         </table>
-    <?php else: ?>
-        <p style="text-align: center; padding: 20px; color: #666;">No active issues to display for Ward <?php echo $ward_no; ?>.</p>
-    <?php endif; ?>
+    </div>
 </div>
 
 <?php include 'includes/footer.php'; ?>

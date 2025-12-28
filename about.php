@@ -25,7 +25,7 @@ include 'includes/header.php';
         </ul>
 
         <h3 style="margin-top: 30px;">The Team</h3>
-        <p>Built with ❤️ for the development of our nation. This project is a step towards a Digital Nepal.</p>
+        <p>Built with dedication and love for the development of our nation. This project is a step towards a Digital Nepal.</p>
     </div>
 </div>
 

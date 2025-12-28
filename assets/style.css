@@ -58,8 +58,8 @@ a:hover {
 
 /* Notification Alert Button (Yellow Badge) */
 .nav-alert {
-    background-color: #ffc107; /* Warning Yellow */
-    color: #333 !important;    /* Dark text */
+    background-color: #C41E3A; /* Nepal Blue */
+    color: #ffffff !important;    /* Dark text */
     padding: 5px 10px;
     border-radius: 4px;
     font-weight: bold;
@@ -69,7 +69,7 @@ a:hover {
 }
 
 .nav-alert:hover {
-    background-color: #e0a800; /* Darker Yellow */
+    background-color: #003893; /* Nepal Blue */
     text-decoration: none;
     color: black !important;
 }
@@ -86,10 +86,16 @@ a:hover {
     border-bottom: 5px solid #003893; /* Nepal Blue Border */
 }
 
-.nav-logo {
-    height: 40px; 
-    vertical-align: middle; 
-    margin-right: 10px;
+.nav-logo { 
+    height: 65px; /* Increased from 40px to 65px for the zoom effect */
+    width: auto;
+    margin-right: 15px;
+    transition: transform 0.3s ease; /* Smooth transition for hover */
+    filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.2)); /* Makes logo pop against red */
+}
+
+.nav-logo:hover {
+    transform: scale(1.1); /* Zooms in slightly more on hover */
 }
 
 .logo {

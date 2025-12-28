@@ -29,7 +29,7 @@ include 'includes/header.php';
 ?>
 
 <div class="container">
-    <div class="form-card" style="border-top: 5px solid #28a745;"> <h2>My Notifications</h2>
+    <div class="form-card" style="border-top: 5px solid #C41E3A;"> <h2>My Notifications</h2>
         
         <?php if ($result->num_rows > 0): ?>
             <ul style="list-style: none; padding: 0;">
@@ -53,7 +53,7 @@ include 'includes/header.php';
                         </div>
                         
                         <?php if ($row['is_read'] == 0): ?>
-                            <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">New</span>
+                            <span style="background: #C41E3A; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">New</span>
                         <?php endif; ?>
                     </li>
                 <?php endwhile; ?>
