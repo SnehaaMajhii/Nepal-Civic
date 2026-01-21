@@ -1,127 +1,164 @@
 <?php
-// login.php
-include 'includes/db.php'; 
+// Start Session
+session_start();
+include 'includes/db.php';
 
-// Check if user is already logged in, redirect them accordingly
-if (isset($_SESSION['user_id'])) {
-    if ($_SESSION['role'] === 'admin') header("Location: admin_dashboard.php");
-    elseif ($_SESSION['role'] === 'manager') header("Location: department_dashboard.php");
-    else header("Location: citizen_dashboard.php");
+$error = "";
+
+// Check if user is already logged in, redirect them based on role
+if (isset($_SESSION['role'])) {
+    if ($_SESSION['role'] === 'admin') {
+        header("Location: admin_dashboard.php");
+    } elseif ($_SESSION['role'] === 'ward_member') {
+        header("Location: ward_dashboard.php");
+    } else {
+        header("Location: index.php");
+    }
     exit();
 }
 
-$error = "";
-$info_msg = "";
-
-// Handle URL messages (from registration or logout)
-if (isset($_GET['msg'])) {
-    if ($_GET['msg'] === 'registered') $info_msg = "Registration successful! You can now login.";
-    if ($_GET['msg'] === 'loggedout') $info_msg = "You have been successfully logged out.";
-}
-
-// --- HANDLE LOGIN SUBMISSION ---
+// HANDLE LOGIN FORM SUBMISSION
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+    $password = $_POST['password'];
 
-    if (!empty($email) && !empty($password)) {
-        
-        // 1. Check ADMINS Table
-        $stmt = $conn->prepare("SELECT admin_id, name, password FROM admins WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        if ($res->num_rows === 1) {
-            $row = $res->fetch_assoc();
-            if ($password === $row['password']) { // Use password_verify() if hashed
-                $_SESSION['user_id'] = $row['admin_id'];
-                $_SESSION['role'] = 'admin';
-                $_SESSION['name'] = $row['name'];
-                header("Location: admin_dashboard.php");
-                exit();
-            }
-        }
+    $admin_email = 'admin@nepalcivic.com';
+    $admin_hash  = '$2y$10$loXhnq3AlP/3j3xJcKbkTOf1BYEZLF2xa4DS.jbLEHMjJZJ6dEfVS'; 
 
-        // 2. Check MANAGERS Table
-        $stmt = $conn->prepare("SELECT manager_id, name, password, dept_id, ward_no FROM department_managers WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        if ($res->num_rows === 1) {
-            $row = $res->fetch_assoc();
-            if ($password === $row['password']) {
-                $_SESSION['user_id'] = $row['manager_id'];
-                $_SESSION['role'] = 'manager';
-                $_SESSION['name'] = $row['name'];
-                $_SESSION['dept_id'] = $row['dept_id'];
-                $_SESSION['ward_no'] = $row['ward_no'];
-                header("Location: department_dashboard.php");
-                exit();
-            }
-        }
-
-        // 3. Check CITIZENS Table
-        $stmt = $conn->prepare("SELECT citizen_id, name, password FROM citizens WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $res = $stmt->get_result();
-        if ($res->num_rows === 1) {
-            $row = $res->fetch_assoc();
-            if ($password === $row['password']) {
-                $_SESSION['user_id'] = $row['citizen_id'];
-                $_SESSION['role'] = 'citizen';
-                $_SESSION['name'] = $row['name'];
-                header("Location: citizen_dashboard.php");
-                exit();
-            }
-        }
-
-        $error = "Invalid email or password. Please try again.";
-    } else {
-        $error = "Please fill in all fields.";
-    }
+if ($email === $admin_email && password_verify($password, $admin_hash)) {
+    $_SESSION['user_id'] = 0;
+    $_SESSION['username'] = 'Super Admin';
+    $_SESSION['role'] = 'admin';
+    header("Location: admin_dashboard.php");
+    exit();
 }
 
-$page_title = "Login - Nepal Civic";
-include 'includes/header.php';
+
+    // 2. CHECK WARD MEMBERS (Chairperson, Secretary, etc.)
+    // We join with 'wards' table to store the Ward Number in the session
+    $stmt = $conn->prepare("SELECT wm.*, w.ward_no FROM ward_members wm JOIN wards w ON wm.ward_id = w.ward_id WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($row = $result->fetch_assoc()) {
+        // Verify Password (Plain text for now. In production, use password_verify)
+        if ($password === $row['password']) {
+            $_SESSION['user_id'] = $row['member_id'];
+            $_SESSION['username'] = $row['full_name'];
+            $_SESSION['role'] = 'ward_member'; 
+            $_SESSION['designation'] = $row['designation'];
+            $_SESSION['ward_no'] = $row['ward_no'];
+            
+            header("Location: ward_dashboard.php"); // Redirect to Ward Panel
+            exit();
+        } 
+    }
+    $stmt->close();
+
+    // 3. CHECK CITIZENS (Regular Users)
+    $stmt = $conn->prepare("SELECT * FROM citizens WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($row = $result->fetch_assoc()) {
+    if ($password === $row['password']) {
+        $_SESSION['user_id'] = $row['citizen_id'];
+        $_SESSION['username'] = $row['name'];
+        $_SESSION['role'] = 'citizen';
+
+        header("Location: citizen_dashboard.php");
+        exit();}
+    }
+
+    $stmt->close();
+
+    // If we reach here, no match was found
+    $error = "Invalid email or password.";
+}
 ?>
 
-<div class="container">
-    <div class="login-box" style="max-width: 400px; margin: 60px auto; padding: 30px; background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-        <h2 style="text-align: center; color: #003893; margin-bottom: 20px;">Sign In</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Nepal Civic</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        /* Specific styles for the centered login page */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e9ecef;
+        }
+        .login-wrapper {
+            width: 100%;
+            max-width: 400px;
+        }
+        .form-card {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .logo-area {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo-area h2 {
+            border: none;
+            color: var(--nepal-blue);
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .home-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .home-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
 
-        <?php if ($info_msg): ?>
-            <p class="error-msg" style="background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; text-align: center; font-size: 0.9rem; margin-bottom: 15px;">
-                <?php echo $info_msg; ?>
-            </p>
+<div class="login-wrapper">
+    <div class="form-card">
+        <div class="logo-area">
+            <h2>Nepal Civic</h2>
+            <p style="color:#777;">Secure Login Portal</p>
+        </div>
+
+        <?php if($error): ?>
+            <div class="error-msg"><?php echo $error; ?></div>
         <?php endif; ?>
 
-        <?php if ($error): ?>
-            <p class="error-msg" style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; text-align: center; font-size: 0.9rem; margin-bottom: 15px;">
-                <?php echo $error; ?>
-            </p>
-        <?php endif; ?>
-        
-        <form method="POST" action="login.php">
-            <div class="input-group" style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px;">Email Address</label>
-                <input type="email" name="email" required placeholder="Enter your email" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+        <form method="POST" action="login.php" style="display:flex; flex-direction:column; gap:15px;">
+            <div>
+                <label style="font-weight:600; font-size:14px; color:#555;">Email Address</label>
+                <input type="email" name="email" required placeholder="name@example.com">
             </div>
-            
-            <div class="input-group" style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px;">Password</label>
-                <input type="password" name="password" required placeholder="Enter your password" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+
+            <div>
+                <label style="font-weight:600; font-size:14px; color:#555;">Password</label>
+                <input type="password" name="password" required placeholder="Enter your password">
             </div>
-            
-            <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-weight: bold;">Login</button>
+
+            <button type="submit" class="btn-primary" style="width:100%; padding:12px; margin-top:10px;">Login</button>
         </form>
 
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-
-        <p style="text-align: center; font-size: 0.9rem;">
-            New Citizen? <a href="register.php" style="color: #003893; font-weight: bold; text-decoration: none;">Register Here</a>
-        </p>
+        <div style="text-align:center; margin-top:20px; font-size:14px;">
+            Don't have an account? <a href="register.php" style="color:var(--nepal-blue); font-weight:bold;">Register here</a>
+        </div>
     </div>
+
+    <a href="index.php" class="home-link">&larr; Back to Home</a>
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<script src="assets/main.js"></script>
+
+</body>
+</html>

@@ -1,31 +1,42 @@
 <?php
 // about.php
+include 'includes/db.php';
 $page_title = "About Us - Nepal Civic";
 include 'includes/header.php';
 ?>
 
-<div class="hero" style="padding: 60px 20px; border-bottom: none;">
-    <h1>Empowering Local Governance</h1>
-    <p> bridging the gap between citizens and their Ward Officers through technology.</p>
-</div>
-
 <div class="container">
-    <div class="form-card" style="max-width: 900px; border-top: 5px solid #003893;">
-        <h2 style="color: #003893;">Our Mission</h2>
-        <p style="margin-bottom: 20px; font-size: 1.1rem; color: #555;">
-            <strong>Nepal Civic</strong> is designed to modernize how local problems are reported and resolved. 
-            We believe that every citizen deserves a voice, and every Ward Officer needs the right tools to serve effectively.
+    <div class="form-card" style="border-top: 5px solid var(--nepal-red);">
+        <h1 style="color: var(--nepal-red); text-align: center;">About Nepal Civic</h1>
+        <p style="font-size: 1.1rem; line-height: 1.6; color: #444; text-align: center; max-width: 800px; margin: 0 auto 30px;">
+            Nepal Civic is a digital bridge between citizens and their local municipal government. 
+            We empower residents to report infrastructure issues directly to their Ward Officers 
+            for a cleaner, safer, and better-managed community.
         </p>
 
-        <h3 style="margin-top: 30px;">How It Helps</h3>
-        <ul style="margin-left: 20px; line-height: 1.8;">
-            <li><strong>Transparency:</strong> Public feeds allow everyone to see what issues are being reported in their neighborhood.</li>
-            <li><strong>Accountability:</strong> Status updates (Pending &rarr; In Progress &rarr; Resolved) keep officials accountable.</li>
-            <li><strong>Speed:</strong> Direct digital reporting removes the need for physical applications and paperwork.</li>
-        </ul>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 40px;">
+            <div style="padding: 20px; border: 1px solid #eee; border-radius: 8px; text-align: center;">
+                <h3 style="color: var(--nepal-blue);">The Citizen</h3>
+                <p>Identifies local issues, uploads photo evidence, and tracks the status of their reports in real-time.</p>
+            </div>
 
-        <h3 style="margin-top: 30px;">The Team</h3>
-        <p>Built with dedication and love for the development of our nation. This project is a step towards a Digital Nepal.</p>
+            <div style="padding: 20px; border: 1px solid #eee; border-radius: 8px; text-align: center;">
+                <h3 style="color: var(--nepal-blue);">The Admin</h3>
+                <p>Acts as the gatekeeper by moderating reports to prevent spam and assigning qualified Ward Officers to specific wards.</p>
+            </div>
+
+            <div style="padding: 20px; border: 1px solid #eee; border-radius: 8px; text-align: center;">
+                <h3 style="color: var(--nepal-blue);">The Ward Officer</h3>
+                <p>Oversees all approved issues within their assigned ward, manages the resolution process, and updates the public.</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 50px; background: var(--gray-bg); padding: 30px; border-radius: 8px; text-align: center;">
+            <h2 style="color: var(--nepal-blue);">Our Vision</h2>
+            <p style="font-style: italic; color: #666;">
+                "To foster accountability and transparency in local governance through technology."
+            </p>
+        </div>
     </div>
 </div>
 

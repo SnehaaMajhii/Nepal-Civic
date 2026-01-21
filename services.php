@@ -11,22 +11,22 @@ include 'includes/header.php';
     <div class="features" style="justify-content: center;">
         
         <div class="feature-card">
-            <h3>🚰 Water Supply</h3>
+            <a href="water.php"><h3>🚰 Water Supply</h3></a>
             <p>Report pipeline leaks, contaminated water, or supply shortages directly to the Water Authority under Ministry of Water Supply.</p>
         </div>
 
         <div class="feature-card">
-            <h3>🚧 Roads & Infrastructure</h3>
+            <a href="road.php"><h3>🚧 Roads & Infrastructure</h3></a>
             <p>Potholes, broken pavement, and blocked drainage systems can be reported for quick maintenance to bodies under Ministry of Physical Infrastructure and Transport.</p>
         </div>
 
         <div class="feature-card">
-            <h3>♻️ Waste Management</h3>
+            <a href="waste.php"><h3>♻️ Waste Management</h3></a>
             <p>Schedule pickups or report illegal dumping sites to keep our wards clean and green.</p>
         </div>
 
         <div class="feature-card">
-            <h3>⚡ Electricity</h3>
+            <a href="electricity.php"><h3>⚡ Electricity</h3></a>
             <p>Report fallen poles, broken streetlights, or dangerous wiring hazards immediately to bodies under Ministry of Energy, Water Resources and Irrigation</p>
         </div>
 

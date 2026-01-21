@@ -2,7 +2,7 @@
 include 'includes/db.php';
 
 // Security: Only Ward Officers (Managers) allowed
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'manager') {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ward_member') {
     header("Location: login.php");
     exit();
 }
@@ -26,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_status'])) {
         $c_id = $issue_data['citizen_id'];
         $title = $issue_data['title'];
         
-        $msg = "Ward Update: Your report on '$title' is now $new_status.";
+        $msg = "Ward Update: Your report on $title is now $new_status.";
         $conn->query("INSERT INTO notifications (message, user_id, user_type) VALUES ('$msg', $c_id, 'citizen')");
         
         $success_msg = "Status updated and citizen notified!";

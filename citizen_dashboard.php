@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'citizen') {
 }
 
 $citizen_id = $_SESSION['user_id'];
-$citizen_name = $_SESSION['name'];
+$citizen_name = $_SESSION['username'];
 
 // Fetch all issues reported by this specific citizen
 $sql = "SELECT issues.*, departments.name as dept_name 

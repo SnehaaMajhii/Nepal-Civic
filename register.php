@@ -8,7 +8,7 @@ $message = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $national_id = trim($_POST['national_id']);
     $ward_no = intval($_POST['ward_no']);
     $address = trim($_POST['address']);
@@ -68,14 +68,14 @@ include 'includes/header.php';
         <form id="registrationForm" method="POST" action="register.php" novalidate>
             <div class="input-group">
                 <label style="font-weight: bold; margin-bottom: 5px; display: block;">Full Name</label>
-                <input type="text" name="name" placeholder="E.g. Kali Uchis" required 
+                <input type="text" name="name" placeholder="E.g. Sita Sigdel" required 
                        style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                 <span class="val-error" id="name-err" style="color: var(--nepal-red); font-size: 0.8rem; margin-top: 5px; display: block;"></span>
             </div>
 
             <div class="input-group" style="margin-top: 15px;">
                 <label style="font-weight: bold; margin-bottom: 5px; display: block;">Email Address</label>
-                <input type="email" name="email" placeholder="kaliuchis@mail.com" required 
+                <input type="email" name="email" placeholder="sitasig@mail.com" required 
                        style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                 <span class="val-error" id="email-err" style="color: var(--nepal-red); font-size: 0.8rem; margin-top: 5px; display: block;"></span>
             </div>
@@ -105,7 +105,7 @@ include 'includes/header.php';
                 </div>
                 <div class="input-group" style="flex: 2;">
                     <label style="font-weight: bold; margin-bottom: 5px; display: block;">Address (Tole/Street)</label>
-                    <input type="text" name="address" placeholder="e.g. Baddie Nagar" required 
+                    <input type="text" name="address" placeholder="e.g.Guras Tole" required 
                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                     <span class="val-error" id="addr-err" style="color: var(--nepal-red); font-size: 0.8rem; margin-top: 5px; display: block;"></span>
                 </div>

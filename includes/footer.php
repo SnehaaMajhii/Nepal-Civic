@@ -9,7 +9,7 @@
                 Working together for cleaner wards and better infrastructure.
             </p>
             <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">
-                Developed by :<br> Swastika Timalasena <br> Sneha Majhi
+                Developed by :<br> Swastika Timalasena Sneha Majhi
             </p>
         </div>
     </footer>
