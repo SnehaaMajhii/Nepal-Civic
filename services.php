@@ -1,42 +1,84 @@
 <?php
-// services.php
-include 'includes/db.php'; // Included to fetch dynamic departments count if needed
-$page_title = "Our Services - Nepal Civic";
-include 'includes/header.php';
+session_start();
 ?>
 
-<div class="container" style="padding-top: 40px;">
-    <h1 style="text-align: center; margin-bottom: 40px;">Public Services & Departments</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Services | Nepal Civic</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
 
-    <div class="features" style="justify-content: center;">
-        
-        <div class="feature-card">
-            <a href="water.php"><h3>🚰 Water Supply</h3></a>
-            <p>Report pipeline leaks, contaminated water, or supply shortages directly to the Water Authority under Ministry of Water Supply.</p>
+<!-- ================= HEADER ================= -->
+<header style="background:#c4161c;color:#fff;padding:15px 0;">
+    <div style="max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:0 15px;">
+        <div style="display:flex;align-items:center;">
+            <img src="assets/images/logo.png" alt="Nepal Civic Logo" style="height:42px;margin-right:10px;">
+            <span style="font-size:22px;font-weight:bold;">Nepal Civic</span>
         </div>
 
-        <div class="feature-card">
-            <a href="road.php"><h3>🚧 Roads & Infrastructure</h3></a>
-            <p>Potholes, broken pavement, and blocked drainage systems can be reported for quick maintenance to bodies under Ministry of Physical Infrastructure and Transport.</p>
+        <nav>
+            <a href="index.php" style="color:#fff;margin-right:15px;">Home</a>
+            <a href="about.php" style="color:#fff;margin-right:15px;">About</a>
+            <a href="services.php" style="color:#fff;margin-right:15px;">Services</a>
+            <a href="community_feed.php" style="color:#fff;margin-right:15px;">Community Feed</a>
+
+            <?php if (!isset($_SESSION['user_role'])) { ?>
+                <a href="login.php" style="color:#fff;">Login</a>
+            <?php } else { ?>
+                <a href="logout.php" style="color:#fff;">Logout</a>
+            <?php } ?>
+        </nav>
+    </div>
+</header>
+
+<!-- ================= SERVICES CONTENT ================= -->
+<section style="max-width:1000px;margin:40px auto;padding:20px;">
+    <h2 style="color:#c4161c;margin-bottom:25px;">Our Services</h2>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;">
+
+        <div class="issue-card">
+            <h3>💧 Water Supply</h3>
+            <p>
+                Report issues related to water leakage, shortage,
+                pipeline damage, and drinking water availability.
+            </p>
         </div>
 
-        <div class="feature-card">
-            <a href="waste.php"><h3>♻️ Waste Management</h3></a>
-            <p>Schedule pickups or report illegal dumping sites to keep our wards clean and green.</p>
+        <div class="issue-card">
+            <h3>⚡ Electricity</h3>
+            <p>
+                Submit complaints regarding power outages,
+                faulty street lights, and electrical hazards.
+            </p>
         </div>
 
-        <div class="feature-card">
-            <a href="electricity.php"><h3>⚡ Electricity</h3></a>
-            <p>Report fallen poles, broken streetlights, or dangerous wiring hazards immediately to bodies under Ministry of Energy, Water Resources and Irrigation</p>
+        <div class="issue-card">
+            <h3>🗑️ Waste & Sanitation</h3>
+            <p>
+                Report garbage collection issues, sanitation problems,
+                and cleanliness concerns in your area.
+            </p>
+        </div>
+
+        <div class="issue-card">
+            <h3>🛣️ Road & Infrastructure</h3>
+            <p>
+                Raise complaints about damaged roads, drainage systems,
+                and other public infrastructure issues.
+            </p>
         </div>
 
     </div>
+</section>
 
-    <div style="text-align: center; margin-top: 40px; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-        <h3>Need service in your area?</h3>
-        <p style="margin-bottom: 20px;">If you see an issue related to these services, don't ignore it.</p>
-        <a href="report.php" class="btn-primary" style="max-width: 200px; margin: 0 auto;">Report an Issue</a>
-    </div>
-</div>
+<!-- ================= FOOTER ================= -->
+<footer style="background:#333;color:#fff;text-align:center;padding:15px;">
+    <p>© <?php echo date("Y"); ?> Nepal Civic | Citizen Complaint Management System</p>
+</footer>
 
-<?php include 'includes/footer.php'; ?>
+</body>
+</html>

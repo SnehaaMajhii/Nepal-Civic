@@ -1,12 +1,8 @@
 <?php
-// logout.php
-session_start();
+include "includes/db.php";
 
-// Destroy all session data
 session_unset();
 session_destroy();
 
-// Redirect to login page with a success message
-header("Location: login.php?msg=loggedout");
+header("Location: login.php");
 exit();
-?>

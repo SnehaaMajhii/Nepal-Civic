@@ -1,21 +1,21 @@
 <?php
-// includes/db.php
-
-$servername = "localhost";
-$username = "root";      // Default XAMPP username
-$password = "";          // Default XAMPP password is empty
-$dbname = "nepalcivic";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Start session if not already started
+/* =========================
+   SESSION START (SAFE)
+========================= */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-?>
+
+/* =========================
+   DATABASE CONNECTION
+========================= */
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db   = "nepalcivic";
+
+$conn = mysqli_connect($host, $user, $pass, $db);
+
+if (!$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
+}

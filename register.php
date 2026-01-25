@@ -1,125 +1,103 @@
 <?php
-// Includes database connection and starts session
-include 'includes/db.php'; 
+include "includes/db.php";
 
-$message = "";
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-// Handle Form Submission
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $national_id = trim($_POST['national_id']);
-    $ward_no = intval($_POST['ward_no']);
-    $address = trim($_POST['address']);
+    $full_name  = $_POST['full_name'];
+    $email      = $_POST['email'];
+    $password   = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $nationalID = $_POST['national_id'];
+    $address    = $_POST['address'];
+    $ward_id    = $_POST['ward_id'];
 
-    // 1. Server-side Strict Validation for Citizenship (Format: 00-00-00-00000)
-    if (!preg_match('/^[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{5}$/', $national_id)) {
-        $message = "Invalid Citizenship format. Please use 00-00-00-00000.";
-    } 
-    // 2. Server-side Email Validation
-    elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $message = "Please enter a valid email address.";
-    }
-    // 3. Server-side Password Length Check
-    elseif (strlen($password) < 8) {
-        $message = "Password must be at least 8 characters long.";
-    }
-    else {
-        // Check if email already exists
-        $check = $conn->prepare("SELECT email FROM citizens WHERE email = ?");
-        $check->bind_param("s", $email);
-        $check->execute();
-        
-        if ($check->get_result()->num_rows > 0) {
-            $message = "This email is already registered!";
-        } else {
-            // Insert into Database
-            $sql = "INSERT INTO citizens (name, email, password, national_id, ward_no, address) VALUES (?, ?, ?, ?, ?, ?)";
-            $stmt = $conn->prepare($sql);
-            // Note: In a production app, use password_hash($password, PASSWORD_DEFAULT)
-            $stmt->bind_param("ssssis", $name, $email, $password, $national_id, $ward_no, $address);
+    /* FILE UPLOADS */
+    $front = $_FILES['citizenship_front']['name'];
+    $back  = $_FILES['citizenship_back']['name'];
 
-            if ($stmt->execute()) {
-                header("Location: login.php?msg=registered");
-                exit();
-            } else {
-                $message = "Registration failed. Please try again later.";
-            }
-        }
-    }
+    move_uploaded_file($_FILES['citizenship_front']['tmp_name'], "uploads/".$front);
+    move_uploaded_file($_FILES['citizenship_back']['tmp_name'], "uploads/".$back);
+
+    mysqli_query($conn, "
+        INSERT INTO citizen
+        (national_id, full_name, email, password, address, citizenship_front, citizenship_back, ward_id)
+        VALUES
+        ('$nationalID', '$full_name', '$email', '$password', '$address', '$front', '$back', '$ward_id')
+    ");
+
+    header("Location: login.php");
+    exit();
 }
-
-$page_title = "Citizen Registration - Nepal Civic";
-include 'includes/header.php';
 ?>
 
-<div class="container">
-    <div class="form-card" style="max-width: 600px; margin: 40px auto; border-top: 5px solid var(--nepal-blue);">
-        <h2 style="text-align: center; color: var(--nepal-blue); margin-bottom: 10px;">Citizen Registration</h2>
-        <p style="text-align: center; color: #666; margin-bottom: 25px;">Create an account to report and track community issues.</p>
-        
-        <?php if ($message): ?> 
-            <p class="error-msg" style="color: var(--nepal-red); text-align: center; font-weight: bold; margin-bottom: 20px;">
-                <?php echo $message; ?>
-            </p> 
-        <?php endif; ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Citizen Registration | Nepal Civic</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
 
-        <form id="registrationForm" method="POST" action="register.php" novalidate>
-            <div class="input-group">
-                <label style="font-weight: bold; margin-bottom: 5px; display: block;">Full Name</label>
-                <input type="text" name="name" placeholder="E.g. Sita Sigdel" required 
-                       style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                <span class="val-error" id="name-err" style="color: var(--nepal-red); font-size: 0.8rem; margin-top: 5px; display: block;"></span>
-            </div>
+<div class="auth-container">
+    <div class="auth-box">
+        <h2>Citizen Registration</h2>
 
-            <div class="input-group" style="margin-top: 15px;">
-                <label style="font-weight: bold; margin-bottom: 5px; display: block;">Email Address</label>
-                <input type="email" name="email" placeholder="sitasig@mail.com" required 
-                       style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                <span class="val-error" id="email-err" style="color: var(--nepal-red); font-size: 0.8rem; margin-top: 5px; display: block;"></span>
-            </div>
+        <form method="POST" id="registerForm" enctype="multipart/form-data">
 
-            <div class="input-group" style="margin-top: 15px;">
-                <label style="font-weight: bold; margin-bottom: 5px; display: block;">Password</label>
-                <input type="password" name="password" placeholder="Min 8 chars (letters + numbers)" required 
-                       style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                <span class="val-error" id="pass-err" style="color: var(--nepal-red); font-size: 0.8rem; margin-top: 5px; display: block;"></span>
-            </div>
+            <input type="text" name="full_name" placeholder="Full Name" required>
 
-            <div class="input-group" style="margin-top: 15px;">
-                <label style="font-weight: bold; margin-bottom: 5px; display: block;">Citizenship Number</label>
-                <input type="text" name="national_id" placeholder="00-00-00-00000" 
-                       pattern="[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{5}" 
-                       title="Please follow the format: 00-00-00-00000" required 
-                       style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                <span class="val-error" id="id-err" style="color: var(--nepal-red); font-size: 0.8rem; margin-top: 5px; display: block;"></span>
-                <small style="color: #888;">District-Office-Year-Serial</small>
-            </div>
+            <input type="email" name="email" id="email" placeholder="Email" required>
 
-            <div style="display: flex; gap: 20px; margin-top: 15px;">
-                <div class="input-group" style="flex: 1;">
-                    <label style="font-weight: bold; margin-bottom: 5px; display: block;">Ward No.</label>
-                    <input type="number" name="ward_no" min="1" max="32" required 
-                           style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                </div>
-                <div class="input-group" style="flex: 2;">
-                    <label style="font-weight: bold; margin-bottom: 5px; display: block;">Address (Tole/Street)</label>
-                    <input type="text" name="address" placeholder="e.g.Guras Tole" required 
-                           style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                    <span class="val-error" id="addr-err" style="color: var(--nepal-red); font-size: 0.8rem; margin-top: 5px; display: block;"></span>
-                </div>
-            </div>
+            <input type="password" name="password" id="password" placeholder="Password" required>
 
-            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 30px; font-weight: bold; font-size: 1rem;">
-                Register Account
-            </button>
+            <input type="text" name="national_id" placeholder="Citizenship Number" required>
+
+            <!-- ADDRESS -->
+            <input type="text" name="address" placeholder="Address (Tole / Street)" required>
+
+            <!-- WARD -->
+            <select name="ward_id" id="ward_id" required>
+                <option value="">Select Ward</option>
+                <?php
+                $wards = mysqli_query($conn, "SELECT * FROM ward");
+                while ($w = mysqli_fetch_assoc($wards)) {
+                    echo "<option value='{$w['ward_id']}'>Ward {$w['ward_no']}</option>";
+                }
+                ?>
+            </select>
+
+            <!-- FILE UPLOADS -->
+            <label style="font-size:13px; color:#555;">
+                Citizenship Front Image (clear photo)
+            </label>
+            <input type="file" name="citizenship_front" accept="image/*" required>
+
+            <label style="font-size:13px; color:#555;">
+                Citizenship Back Image (clear photo)
+            </label>
+            <input type="file" name="citizenship_back" accept="image/*" required>
+
+            <button type="submit">Register</button>
         </form>
 
-        <p style="text-align: center; margin-top: 20px;">
-            Already have an account? <a href="login.php" style="color: var(--nepal-blue); font-weight: bold; text-decoration: none;">Login here</a>
-        </p>
+        <!-- LINKS -->
+        <div style="margin-top:15px; text-align:center; font-size:14px;">
+            <p>
+                Already registered?
+                <a href="login.php" style="color:#0b3c91; font-weight:bold;">
+                    Login here
+                </a>
+            </p>
+
+            <p style="margin-top:8px;">
+                <a href="index.php" style="color:#555;">
+                    ← Back to Home
+                </a>
+            </p>
+        </div>
+
     </div>
 </div>
 
-<?php include 'includes/footer.php'; ?>
+<script src="assets/main.js"></script>
+</body>
+</html>
