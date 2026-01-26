@@ -1,8 +1,4 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 include "includes/db.php";
 
 /* ======================
@@ -48,48 +44,57 @@ elseif ($role === 'admin') {
     ";
 }
 
-
 $notifications = mysqli_query($conn, $query);
+
+/* ======================
+   MARK ALL AS READ
+====================== */
+if ($role === 'citizen') {
+    mysqli_query($conn, "UPDATE notification SET is_read = 1 WHERE citizen_id = $cid");
+}
+elseif ($role === 'staff') {
+    mysqli_query($conn, "UPDATE notification SET is_read = 1 WHERE staff_id = $sid");
+}
+elseif ($role === 'admin') {
+    mysqli_query($conn, "UPDATE notification SET is_read = 1 WHERE admin_id = $aid");
+}
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Notifications | Nepal Civic</title>
-    <link rel="stylesheet" href="assets/style.css">
-</head>
-<body>
+<h2>Notifications</h2>
 
-<!-- <div class="main-content"> -->
+<?php if (mysqli_num_rows($notifications) === 0) { ?>
+    <div class="empty-state">No notifications found.</div>
+<?php } ?>
 
-    <h2>Notifications</h2>
+<?php while ($n = mysqli_fetch_assoc($notifications)) { ?>
 
-    <?php if (mysqli_num_rows($notifications) === 0) { ?>
-        <p>No notifications found.</p>
-    <?php } ?>
+    <div class="issue-card"
+         style="<?= $n['is_read'] ? '' : 'border-left:4px solid #c4161c;' ?>">
 
-    <?php while ($n = mysqli_fetch_assoc($notifications)) { ?>
+        <p><?= htmlspecialchars($n['message']) ?></p>
 
-        <div class="issue-card"
-             style="<?= $n['is_read'] ? '' : 'border-left:4px solid #c4161c;' ?>">
+        <small>
+            <?= date("d M Y, h:i A", strtotime($n['date_sent'])) ?>
+        </small>
 
-            <p><?= htmlspecialchars($n['message']) ?></p>
-
-            <small><?= date("d M Y, h:i A", strtotime($n['date_sent'])) ?></small>
-
-            <?php if (!empty($n['issue_id'])) { ?>
-                <div class="issue-actions" style="margin-top:10px;">
-                    <a href="generate_report.php?issue_id=<?= (int)$n['issue_id'] ?>">
+        <?php if (!empty($n['issue_id'])) { ?>
+            <div class="issue-actions" style="margin-top:10px;">
+                <?php if ($role === 'citizen') { ?>
+                    <a href="citizen_dashboard.php?page=my_issues">
                         <button>View Issue</button>
                     </a>
-                </div>
-            <?php } ?>
+                <?php } elseif ($role === 'admin') { ?>
+                    <a href="admin_dashboard.php?page=issues">
+                        <button>View Issue</button>
+                    </a>
+                <?php } elseif ($role === 'staff') { ?>
+                    <a href="staff_dashboard.php">
+                        <button>View Issue</button>
+                    </a>
+                <?php } ?>
+            </div>
+        <?php } ?>
 
-        </div>
+    </div>
 
-    <?php } ?>
-
-</div>
-
-</body>
-</html>
+<?php } ?>

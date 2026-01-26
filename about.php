@@ -59,7 +59,7 @@ session_start();
 </section>
 
 <!-- ================= FOOTER ================= -->
-<footer style="background:#333;color:#fff;text-align:center;padding:15px;">
+<footer style="background:#333;color:#fff;text-align:center;padding:15px;position:fixed;bottom:0;left:0;width:100%;">
     <p>© <?php echo date("Y"); ?> Nepal Civic | Citizen Complaint Management System</p>
 </footer>
 

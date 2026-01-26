@@ -11,8 +11,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   background: #f1f3f6;
   color: #333;
-  overflow: hidden; /* Body NEVER scrolls */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
+
 
 /* =========================
    LINKS & BUTTONS
@@ -324,9 +327,11 @@ button:hover {
    COMMUNITY FEED
 ========================= */
 .feed-container {
-  max-width: 1200px;
+  max-width: 1400px;   /* wider on large screens */
+  width: 95%;          /* fills more space */
   margin: 30px auto;
 }
+
 
 .feed-grid {
   display: grid;
@@ -348,8 +353,9 @@ button:hover {
 }
 
 .feed-card-body {
-  padding: 15px;
+  padding: 24px 28px;  /* vertical | horizontal */
 }
+
 
 .feed-card h3 {
   color: #c4161c;

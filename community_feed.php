@@ -1,6 +1,8 @@
 <?php
 include "includes/db.php";
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Fetch all issues (public)
 $issues = mysqli_query($conn, "
@@ -32,6 +34,8 @@ $issues = mysqli_query($conn, "
     
     <h2 style="text-align:center;">Community Issues</h2>
     <p style="text-align:center;">Publicly reported issues for transparency and accountability</p>
+    <p><a href="index.php">Back to Home</a></p>
+    <br>
 
     <div class="feed-grid">
 
@@ -39,11 +43,12 @@ $issues = mysqli_query($conn, "
 
             <div class="feed-card">
 
-                <?php if ($row['photo_update']) { ?>
-                    <img src="<?php echo $row['photo_update']; ?>" alt="Issue Image">
+                <?php if (!empty($row['photo_update'])) { ?>
+                    <img src="uploads/issues/<?php echo htmlspecialchars($row['photo_update']); ?>" alt="Issue Image">
                 <?php } else { ?>
                     <img src="assets/no-image.png" alt="No Image">
                 <?php } ?>
+
 
                 <div class="feed-card-body">
                     <h3><?php echo $row['title']; ?></h3>

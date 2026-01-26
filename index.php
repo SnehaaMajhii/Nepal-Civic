@@ -9,7 +9,8 @@ session_start();
     <title>Nepal Civic | Citizen Complaint Portal</title>
     <link rel="stylesheet" href="assets/style.css">
 </head>
-<body>
+<body style="min-height:100vh;display:flex;flex-direction:column;">
+
 
 <!-- ================= HEADER ================= -->
 <header style="background:#c4161c;color:#fff;padding:15px 0;">
@@ -91,7 +92,7 @@ session_start();
 </section>
 
 <!-- ================= FOOTER ================= -->
-<footer style="background:#333;color:#fff;text-align:center;padding:15px;">
+<footer style="background:#333;color:#fff;text-align:center;padding:15px;margin-top:auto;">
     <p>
         © <?php echo date("Y"); ?> Nepal Civic |
         Citizen Complaint Management System

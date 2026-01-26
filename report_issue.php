@@ -94,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- <div class="main-content"> -->
 
 <h2>Report New Issue</h2>
+<br>
 
 <form method="POST" enctype="multipart/form-data" class="auth-box" id="issueForm">
 

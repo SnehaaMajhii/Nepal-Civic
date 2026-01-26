@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     /* NOTIFY CITIZEN */
     mysqli_query($conn, "
         INSERT INTO notification
-        (message, citizen_id, is_read, created_at)
+        (message, citizen_id, is_read, date_sent)
         VALUES
         (
             'Your issue has been resolved by ward staff.',

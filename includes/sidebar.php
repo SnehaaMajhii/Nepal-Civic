@@ -1,21 +1,12 @@
 <?php
-/* =========================
-   SAFE SESSION START
-========================= */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-/* =========================
-   CURRENT CONTEXT
-========================= */
 $role        = $_SESSION['user_role'] ?? '';
 $currentPage = $_GET['page'] ?? 'dashboard';
 $currentFile = basename($_SERVER['PHP_SELF']);
 
-/* =========================
-   ACTIVE HELPER (SAFE)
-========================= */
 if (!function_exists('isActive')) {
     function isActive($condition) {
         return $condition ? 'active' : '';
@@ -25,7 +16,6 @@ if (!function_exists('isActive')) {
 
 <div class="sidebar">
 
-    <!-- LOGO -->
     <div class="logo">
         <img src="assets/images/logo.png" alt="Nepal Civic">
         <h3>Nepal Civic</h3>
@@ -35,7 +25,7 @@ if (!function_exists('isActive')) {
     <?php if ($role === 'admin') { ?>
 
         <a href="admin_dashboard.php"
-           class="<?= isActive($currentFile === 'admin_dashboard.php' && $currentPage === 'dashboard') ?>">
+           class="<?= isActive($currentPage === 'dashboard') ?>">
             Dashboard
         </a>
 
@@ -65,8 +55,13 @@ if (!function_exists('isActive')) {
     <?php if ($role === 'staff') { ?>
 
         <a href="staff_dashboard.php"
-           class="<?= isActive($currentFile === 'staff_dashboard.php' && $currentPage === 'dashboard') ?>">
+           class="<?= isActive($currentPage === 'dashboard') ?>">
             Dashboard
+        </a>
+
+        <a href="staff_dashboard.php?page=assigned_issues"
+           class="<?= isActive($currentPage === 'assigned_issues') ?>">
+            Assigned Issues
         </a>
 
         <a href="staff_dashboard.php?page=notifications"
@@ -80,7 +75,9 @@ if (!function_exists('isActive')) {
     <?php if ($role === 'citizen') { ?>
 
         <a href="citizen_dashboard.php"
-           class="<?= isActive($currentFile === 'citizen_dashboard.php' && $currentPage === 'dashboard') ?>">
+            class="<?= isActive(
+ $currentPage === 'dashboard' 
+            && $currentFile === 'citizen_dashboard.php') ?>">
             Dashboard
         </a>
 
@@ -100,14 +97,13 @@ if (!function_exists('isActive')) {
         </a>
 
         <a href="community_feed.php"
-           class="<?= isActive($currentFile === 'community_feed.php') ?>">
+            class="<?= isActive($currentFile === 'community_feed.php') ?>">
             Community Feed
         </a>
-
+        
     <?php } ?>
 
-    <!-- ================= LOGOUT ================= -->
-    <a href="logout.php" class="logout-link" style="margin-top:20px;">
+    <a href="logout.php" style="margin-top:20px;">
         Logout
     </a>
 
