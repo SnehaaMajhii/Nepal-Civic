@@ -31,8 +31,8 @@ $issues = mysqli_query($conn, "
 <body>
 
 <div class="feed-container">
-    
-    <h2 style="text-align:center;">Community Issues</h2>
+
+    <h2 style="color:#c4161c; text-align:center;">Community Issues</h2>
     <p style="text-align:center;">Publicly reported issues for transparency and accountability</p>
     <p><a href="index.php">Back to Home</a></p>
     <br>
