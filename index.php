@@ -65,7 +65,7 @@ session_start();
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;">
 
         <div class="issue-card">
-            <h3>🧑 Citizen</h3>
+            <h3>📢 Report</h3>
             <p>
                 Citizens can register, submit complaints, upload issue images,
                 vote on urgent issues, and track resolution status.
@@ -73,15 +73,15 @@ session_start();
         </div>
 
         <div class="issue-card">
-            <h3>🧑‍💼 Admin</h3>
+            <h3>👁️‍🗨️ Analyse</h3>
             <p>
-                Admin verifies complaints, manages ward staff,
-                monitors overall performance, and ensures transparency.
+                Issues are verified, managed and monitored for
+                overall performance, and ensures transparency.
             </p>
         </div>
 
         <div class="issue-card">
-            <h3>🧑‍🔧 Ward Staff</h3>
+            <h3>✅ Resolve</h3>
             <p>
                 Ward staff receive assigned issues, resolve them on the field,
                 and update the system with progress details.

@@ -77,6 +77,21 @@ button:hover {
   width: 100%;
 }
 
+/* Registration form fix */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.auth-box {
+  max-height: 90vh;           /* IMPORTANT */
+  overflow-y: auto;           /* INTERNAL SCROLL */
+}
+
+
 /* =========================
    DASHBOARD LAYOUT
 ========================= */
@@ -257,7 +272,7 @@ button:hover {
    ISSUE STATUS COLORS
 ========================= */
 .status-pending { color: orange; font-weight: bold; }
-.status-assigned { color: #0b3c91; font-weight: bold; }
+.status-assigned { color: #0b3c91; font-weight: bold;}
 .status-resolved { color: green; font-weight: bold; }
 .status-rejected { color: red; font-weight: bold; }
 
