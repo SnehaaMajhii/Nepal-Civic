@@ -224,14 +224,18 @@ function initIssueTable(tableBody, pagination) {
         }
     }
 
-    function bindRowClicks() {
-        document.querySelectorAll(".issue-row").forEach(row => {
-            row.onclick = e => {
-                if (e.target.closest("button") || e.target.closest("a")) return;
-                openModal(row.dataset.id);
-            };
-        });
-    }
+   function bindRowClicks() {
+    document.querySelectorAll(".issue-row").forEach(row => {
+        row.onclick = e => {
+
+            // 🚫 Ignore clicks on buttons or links
+            if (e.target.closest("button") || e.target.closest("a")) return;
+
+            openModal(row.dataset.id);
+        };
+    });
+}
+
 
     function openModal(id) {
         fetch(`fetch_issue.php?action=detail&mode=${MODE}&id=${id}`)
@@ -266,6 +270,24 @@ function initIssueTable(tableBody, pagination) {
 
     loadIssues();
 }
+/* ============================
+   MODAL CLOSE HANDLER (SAFE)
+============================ */
+
+document.addEventListener("click", function (e) {
+
+    // Close when ❌ is clicked
+    if (e.target.id === "closeModal") {
+        const modal = document.getElementById("issueModal");
+        if (modal) modal.style.display = "none";
+    }
+
+    // Optional: close when clicking outside modal
+    if (e.target.id === "issueModal") {
+        e.target.style.display = "none";
+    }
+
+});
 
 /* =========================
    WAIT FOR TABLE (ADMIN FIX)
@@ -298,30 +320,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const tbody = document.getElementById("staffIssueTableBody");
     const pagination = document.getElementById("pagination");
 
-    // 🚫 If not staff page → do nothing
     if (!tbody || !pagination) return;
 
     function loadStaffIssues(page = 1) {
+        const title = document.getElementById("staffSearchTitle")?.value || "";
+        const department = document.getElementById("staffFilterDepartment")?.value || "";
+        const statusFilter = document.getElementById("staffFilterStatus")?.value || "";
 
-    const title = document.getElementById("staffSearchTitle")?.value || "";
-    const department = document.getElementById("staffFilterDepartment")?.value || "";
-    const statusFilter = document.getElementById("staffFilterStatus")?.value || "";
-
-    fetch(
-        `fetch_issue.php?action=staff_list&mode=staff&page=${page}` +
-        `&title=${encodeURIComponent(title)}` +
-        `&department=${encodeURIComponent(department)}` +
-        `&status=${encodeURIComponent(statusFilter)}`
-    )
+        fetch(
+            `/Nepal-Civic/fetch_issue.php?action=staff_list&mode=staff&page=${page}` +
+            `&title=${encodeURIComponent(title)}` +
+            `&department=${encodeURIComponent(department)}` +
+            `&status=${encodeURIComponent(statusFilter)}`
+        )
         .then(res => res.json())
         .then(res => {
-
-            const tbody = document.getElementById("staffIssueTableBody");
-            const pagination = document.getElementById("pagination");
-
-            if (!tbody || !pagination) return;
-
             tbody.innerHTML = "";
+            pagination.innerHTML = "";
 
             if (!res.data || res.data.length === 0) {
                 tbody.innerHTML = `
@@ -330,7 +345,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             No issues found
                         </td>
                     </tr>`;
-                pagination.innerHTML = "";
                 return;
             }
 
@@ -358,14 +372,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 </tr>`;
             });
 
-            renderPagination(res.totalPages, res.currentPage, loadStaffIssues);
+            renderPagination(res.totalPages, res.currentPage);
             bindStaffRowClicks();
         })
-        .catch(err => {
-            console.error("Staff issue load failed:", err);
-        });
-}
-
+        .catch(err => console.error("Staff issue load failed:", err));
+    }
 
     function renderPagination(total, current) {
         pagination.innerHTML = "";
@@ -378,44 +389,59 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-   function bindRowClicks() {
-    document.querySelectorAll(".issue-row").forEach(row => {
-        row.onclick = e => {
+    function bindStaffRowClicks() {
+        document.querySelectorAll(".staff-issue-row").forEach(row => {
+            row.onclick = e => {
+                if (e.target.closest("button") || e.target.closest("a")) return;
+                openStaffIssueModal(row.dataset.id);
+            };
+        });
+    }
 
-            // 🚫 Ignore clicks on buttons or links
-            if (e.target.closest("button") || e.target.closest("a")) return;
+    function openStaffIssueModal(issueId) {
+        fetch(`/Nepal-Civic/fetch_issue.php?action=detail&mode=staff&id=${issueId}`)
+            .then(res => res.json())
+            .then(d => {
+                document.getElementById("m_title").textContent = d.title;
+                document.getElementById("m_department").textContent = d.department_name;
+                document.getElementById("m_status").textContent = d.status;
+                document.getElementById("m_urgency").textContent = d.urgency_level || "-";
+                document.getElementById("m_ward").textContent = "Ward " + d.ward_no;
+                document.getElementById("m_reported").textContent = d.date_reported;
+                document.getElementById("m_expected").textContent =
+                    d.expected_resolution_date || "-";
+                document.getElementById("m_description").textContent = d.description;
 
-            openModal(row.dataset.id);
-        };
-    });
-}
+                const img = document.getElementById("m_image");
+                if (d.photo_update) {
+                    img.src = "uploads/issues/" + d.photo_update;
+                    img.style.display = "block";
+                } else {
+                    img.style.display = "none";
+                }
 
+                document.getElementById("issueModal").style.display = "flex";
+            });
+    }
 
-
-        // ===============================
-    // MODAL CLOSE (GLOBAL – ALL ROLES)
-    // ===============================
     document.querySelector(".modal-close")?.addEventListener("click", () => {
         document.getElementById("issueModal").style.display = "none";
     });
 
     window.addEventListener("click", e => {
         const modal = document.getElementById("issueModal");
-        if (e.target === modal) {
-            modal.style.display = "none";
-        }
+        if (e.target === modal) modal.style.display = "none";
     });
 
     document.getElementById("staffSearchTitle")
-    ?.addEventListener("keyup", () => loadStaffIssues(1));
+        ?.addEventListener("keyup", () => loadStaffIssues(1));
 
     document.getElementById("staffFilterDepartment")
-    ?.addEventListener("change", () => loadStaffIssues(1));
+        ?.addEventListener("change", () => loadStaffIssues(1));
 
     document.getElementById("staffFilterStatus")
-    ?.addEventListener("change", () => loadStaffIssues(1));
-
-
+        ?.addEventListener("change", () => loadStaffIssues(1));
 
     loadStaffIssues();
 });
+
