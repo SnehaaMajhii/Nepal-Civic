@@ -5,45 +5,81 @@ function $(id) {
     return document.getElementById(id);
 }
 
-/* =========================
-   FORM VALIDATION
-========================= */
+/* =====================================
+   FRONTEND VALIDATION (UX ONLY)
+   Does NOT replace PHP validation
+===================================== */
+
 document.addEventListener("DOMContentLoaded", () => {
 
-    const loginForm = $("loginForm");
-    if (loginForm) {
-        loginForm.addEventListener("submit", e => {
-            if (!$("email").value || !$("password").value) {
-                alert("Please fill in all fields.");
-                e.preventDefault();
-            }
-        });
-    }
+    const registerForm = document.getElementById("registerForm");
+    if (!registerForm) return;
 
-    const registerForm = $("registerForm");
-    if (registerForm) {
-        registerForm.addEventListener("submit", e => {
-            if (!$("email").value || !$("password").value || !$("ward_id").value) {
-                alert("All required fields must be filled.");
-                e.preventDefault();
-            }
-            if ($("password").value.length < 6) {
-                alert("Password must be at least 6 characters.");
-                e.preventDefault();
-            }
-        });
-    }
+    registerForm.addEventListener("submit", (e) => {
 
-    const issueForm = $("issueForm");
-    if (issueForm) {
-        issueForm.addEventListener("submit", e => {
-            if (!$("title").value || !$("department_id").value || !$("description").value) {
-                alert("Please complete all issue details.");
-                e.preventDefault();
-            }
-        });
-    }
+        const fullName  = document.querySelector("input[name='full_name']").value.trim();
+        const email     = document.querySelector("input[name='email']").value.trim();
+        const password  = document.querySelector("input[name='password']").value;
+        const national  = document.querySelector("input[name='national_id']").value.trim();
+        const address   = document.querySelector("input[name='address']").value.trim();
+        const ward      = document.querySelector("select[name='ward_id']").value;
+
+        const frontImg  = document.querySelector("input[name='citizenship_front']").files.length;
+        const backImg   = document.querySelector("input[name='citizenship_back']").files.length;
+
+        /* =========================
+           REQUIRED CHECK
+        ========================= */
+        if (
+            !fullName || !email || !password ||
+            !national || !address || !ward ||
+            !frontImg || !backImg
+        ) {
+            alert("All fields are required.");
+            e.preventDefault();
+            return;
+        }
+
+        /* =========================
+           EMAIL FORMAT
+        ========================= */
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            alert("Please enter a valid email address.");
+            e.preventDefault();
+            return;
+        }
+
+        /* =========================
+           PASSWORD STRENGTH
+        ========================= */
+        const passwordPattern =
+            /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/;
+
+        if (!passwordPattern.test(password)) {
+            alert("Password must be at least 8 characters and include a letter, number, and symbol.");
+            e.preventDefault();
+            return;
+        }
+
+        /* =========================
+           FILE TYPE CHECK
+        ========================= */
+        const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+
+        const frontType = document.querySelector("input[name='citizenship_front']").files[0].type;
+        const backType  = document.querySelector("input[name='citizenship_back']").files[0].type;
+
+        if (!allowedTypes.includes(frontType) || !allowedTypes.includes(backType)) {
+            alert("Only JPG and PNG images are allowed.");
+            e.preventDefault();
+            return;
+        }
+
+        // ✅ If JS passes → PHP will validate again
+    });
 });
+
 
 /* =========================
    SIDEBAR ACTIVE LINK
@@ -270,24 +306,27 @@ function initIssueTable(tableBody, pagination) {
 
     loadIssues();
 }
-/* ============================
-   MODAL CLOSE HANDLER (SAFE)
-============================ */
-
 document.addEventListener("click", function (e) {
 
-    // Close when ❌ is clicked
+    // Close by ID (admin)
     if (e.target.id === "closeModal") {
         const modal = document.getElementById("issueModal");
         if (modal) modal.style.display = "none";
     }
 
-    // Optional: close when clicking outside modal
+    // Close by class (citizen)
+    if (e.target.classList.contains("close")) {
+        const modal = document.getElementById("issueModal");
+        if (modal) modal.style.display = "none";
+    }
+
+    // Click outside modal
     if (e.target.id === "issueModal") {
         e.target.style.display = "none";
     }
 
 });
+
 
 /* =========================
    WAIT FOR TABLE (ADMIN FIX)
