@@ -64,6 +64,40 @@ $wardQ = mysqli_query($conn, "
 <head>
     <title>Admin Dashboard | Nepal Civic</title>
     <link rel="stylesheet" href="assets/style.css">
+    <style>
+        /* =========================
+   ISSUE MODAL FIX (ADMIN)
+========================= */
+#issueModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+#issueModal .modal-content {
+    background: #fff;
+    padding: 20px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 8px;
+    position: relative;
+}
+
+#closeModal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+    </style>
     <script>
         window.APP_ROLE = "admin";
     </script>
@@ -174,22 +208,30 @@ $issues = mysqli_query($conn, "
 </div>
 
 <div id="pagination" class="pagination"></div>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    if (typeof USER_ROLE === "undefined") return;
-    if (USER_ROLE !== "admin") return;
+ <!-- =========================
+     ISSUE DETAIL MODAL
+========================= -->
+<div id="issueModal" class="modal" style="display:none;">
+    <div class="modal-content">
 
-    // Force-init admin issue table
-    if (document.getElementById("issueTableBody")) {
-        // small delay to ensure main.js is loaded
-        setTimeout(() => {
-            if (typeof window.initIssueTable === "function") {
-                window.initIssueTable();
-            }
-        }, 0);
-    }
-});
-</script>
+        <!-- ❌ CLOSE BUTTON -->
+        <span id="closeModal" style="cursor:pointer;">&times;</span>
+
+        <h3 id="m_title"></h3>
+
+        <p><strong>Department:</strong> <span id="m_department"></span></p>
+        <p><strong>Status:</strong> <span id="m_status"></span></p>
+        <p><strong>Urgency:</strong> <span id="m_urgency"></span></p>
+        <p><strong>Ward:</strong> <span id="m_ward"></span></p>
+        <p><strong>Reported On:</strong> <span id="m_reported"></span></p>
+        <p><strong>Expected Resolution:</strong> <span id="m_expected"></span></p>
+
+        <p id="m_description"></p>
+
+        <img id="m_image" style="max-width:100%; display:none;">
+    </div>
+</div>
+
 
 
 <?php } elseif ($page === 'staff') { ?>
