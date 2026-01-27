@@ -199,7 +199,9 @@ if ($action === 'staff_list') {
     $department = $_GET['department'] ?? '';
 
     // Dynamic WHERE clause
-    $where = "WHERE issue.ward_id = $ward_id";
+    $where = "WHERE issue.ward_id = $ward_id
+          AND issue.status IN ('assigned', 'resolved')";
+
 
     if ($title !== '') {
         $title = mysqli_real_escape_string($conn, $title);

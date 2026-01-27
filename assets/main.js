@@ -402,12 +402,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>${row.expected_resolution_date || "-"}</td>
                     <td>${row.date_reported}</td>
                     <td>
-                        ${row.status === "assigned" ? `
-                            <a href="resolve_issue.php?id=${row.issue_id}">
-                                <button>Resolve</button>
-                            </a>
-                        ` : `<span class="status-resolved">Resolved</span>`}
+                        ${row.status === "assigned"
+                            ? `<a href="resolve_issue.php?issue_id=${row.issue_id}">
+                                <button class="btn btn-sm btn-primary">Resolve</button>
+                            </a>`
+                            : row.status === "resolved"
+                                ? `<span class="status-resolved">Resolved</span>`
+                                : `<span class="text-muted">${row.status}</span>`
+                        }
                     </td>
+
                 </tr>`;
             });
 

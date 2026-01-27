@@ -1,23 +1,30 @@
 <?php
 include "includes/db.php";
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 /* ======================
    STAFF ACCESS ONLY
 ====================== */
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'staff') {
-    header("Location: login.php");
-    exit();
-}
 
-/* ======================
-   GET ISSUE ID
-====================== */
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+/* STAFF ACCESS ONLY */
+if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'staff') {
     header("Location: staff_dashboard.php");
     exit();
 }
 
-$issue_id = (int) $_GET['id'];
+
+/* ======================
+   GET ISSUE ID
+====================== */
+if (!isset($_GET['issue_id']) || !is_numeric($_GET['issue_id'])){
+
+    header("Location: staff_dashboard.php");
+    exit();
+}
+
+$issue_id = (int) $_GET['issue_id'];
 $staff_id = (int) $_SESSION['staff_id'];
 
 /* ======================
