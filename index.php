@@ -102,7 +102,7 @@ nav a:hover::after {
 =============================== */
 .hero {
     background: linear-gradient(
-        rgba(196,22,28,0.95),
+        rgba(247, 127, 131, 0.95),
         rgba(196,22,28,0.95)
     );
     color: #fff;
