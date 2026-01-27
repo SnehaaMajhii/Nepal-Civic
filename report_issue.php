@@ -1,9 +1,7 @@
 <?php
 include "includes/db.php";
 
-/* ======================
-   CITIZEN ACCESS ONLY
-====================== */
+/*CITIZEN ACCESS ONLY*/
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'citizen') {
     header("Location: login.php");
     exit();
@@ -11,9 +9,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'citizen') {
 
 $citizen_id = $_SESSION['citizen_id'];
 
-/* ======================
-   FETCH CITIZEN & WARDS
-====================== */
+/*FETCH CITIZEN & WARDS*/
 $citizen = mysqli_fetch_assoc(mysqli_query($conn, "
     SELECT ward_id FROM citizen WHERE citizen_id = $citizen_id
 "));
@@ -23,9 +19,7 @@ $citizen_ward_id = $citizen['ward_id'];
 $wards = mysqli_query($conn, "SELECT * FROM ward ORDER BY ward_no ASC");
 $departments = mysqli_query($conn, "SELECT * FROM department");
 
-/* ======================
-   FORM SUBMIT
-====================== */
+/* FORM SUBMIT*/
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $title         = mysqli_real_escape_string($conn, $_POST['title']);
@@ -34,9 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $urgency_level = $_POST['urgency_level']; // low | medium | high
     $ward_id       = (int) $_POST['ward_id'];
 
-    /* ======================
-       IMAGE UPLOAD
-    ====================== */
+    /* IMAGE UPLOAD*/
     $photo_update = null;
 
     if (!empty($_FILES['photo_update']['name'])) {
@@ -55,9 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
     }
 
-    /* ======================
-       INSERT ISSUE
-    ====================== */
+    /*INSERT ISSUE*/
     mysqli_query($conn, "
         INSERT INTO issue
         (title, citizen_id, ward_id, department_id, description, status, urgency_level, photo_update)
@@ -94,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- <div class="main-content"> -->
 
 <h2>Report New Issue</h2>
-<br>
+
 
 <form method="POST" enctype="multipart/form-data" class="auth-box" id="issueForm">
 

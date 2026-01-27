@@ -18,17 +18,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     /* -------- CITIZEN LOGIN -------- */
-    $citizenQ = mysqli_query($conn, "SELECT * FROM citizen WHERE email='$email'");
+    $citizenQ = mysqli_query(
+        $conn,
+        "SELECT * FROM citizen WHERE email='$email'"
+    );
+
     if (mysqli_num_rows($citizenQ) === 1) {
+
         $citizen = mysqli_fetch_assoc($citizenQ);
-        if (password_verify($password, $citizen['password'])) {
+
+        if ($citizen['is_active'] == 0) {
+            $error = "Your account has been deactivated due to unnecessary activities.";
+        } 
+        elseif (password_verify($password, $citizen['password'])) {
+
             $_SESSION['user_role']  = 'citizen';
             $_SESSION['citizen_id'] = $citizen['citizen_id'];
             $_SESSION['ward_id']    = $citizen['ward_id'];
+
             header("Location: citizen_dashboard.php");
             exit();
+        } 
+        else {
+            $error = "Invalid email or password.";
         }
+    }   
+    else {
+            $error = "Invalid email or password.";
     }
+
 
     /* -------- STAFF LOGIN -------- */
     $staffQ = mysqli_query($conn, "SELECT * FROM ward_staff WHERE email='$email'");

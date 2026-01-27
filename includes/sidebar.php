@@ -44,10 +44,10 @@ if (!function_exists('isActive')) {
             Manage Staff
         </a>
 
-        <a href="admin_dashboard.php?page=notifications"
+        <!-- <a href="admin_dashboard.php?page=notifications"
            class="<?= isActive($currentPage === 'notifications') ?>">
             Notifications
-        </a>
+        </a> -->
 
     <?php } ?>
 
@@ -64,10 +64,10 @@ if (!function_exists('isActive')) {
             Assigned Issues
         </a>
 
-        <a href="staff_dashboard.php?page=notifications"
-           class="<?= isActive($currentPage === 'notifications') ?>">
+        <!-- <a href="staff_dashboard.php?page=notifications"
+           class="
             Notifications
-        </a>
+        </a> -->
 
     <?php } ?>
 

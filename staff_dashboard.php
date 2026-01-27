@@ -95,12 +95,6 @@ $urgencyQ = mysqli_query($conn, "
         <canvas id="statusChart"></canvas>
     </div>
 
-    <div class="stat-card">
-        <h3>Issues by Urgency</h3>
-        <canvas id="urgencyChart"></canvas>
-    </div>
-</div>
-
 <?php } elseif ($page === 'assigned_issues') { ?>
 
 <?php
@@ -114,41 +108,84 @@ $issues = mysqli_query($conn, "
 ?>
 
 <h2>Assigned Issues</h2>
+<!-- ================= STAFF FILTERS ================= -->
+<div class="issue-filters">
+    <input
+        type="text"
+        id="staffSearchTitle"
+        placeholder="Search by title"
+    >
 
-<?php if (mysqli_num_rows($issues) === 0) { ?>
-    <div class="empty-state">No assigned issues.</div>
-<?php } ?>
+    <select id="staffFilterDepartment">
+        <option value="">All Departments</option>
+        <?php
+        $dQ = mysqli_query($conn, "SELECT department_id, department_name FROM department");
+        while ($d = mysqli_fetch_assoc($dQ)) {
+            echo "<option value='{$d['department_id']}'>{$d['department_name']}</option>";
+        }
+        ?>
+    </select>
 
-<?php while ($row = mysqli_fetch_assoc($issues)) { ?>
-<div class="issue-card">
-    <h3><?= htmlspecialchars($row['title']) ?></h3>
+    <select id="staffFilterStatus">
+        <option value="">All Status</option>
+        <option value="assigned">Assigned</option>
+        <option value="resolved">Resolved</option>
+    </select>
+</div>
 
-    <p><b>Citizen:</b> <?= htmlspecialchars($row['full_name']) ?></p>
 
-    <p>
-        <b>Urgency:</b>
-        <span class="urgency-<?= $row['urgency_level'] ?>">
-            <?= ucfirst($row['urgency_level']) ?>
-        </span>
-    </p>
+<div class="table-card">
+<table class="styled-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Citizen</th>
+            <th>Department</th>
+            <th>Urgency</th>
+            <th>Expected Resolution</th>
+            <th>Date Issued</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="staffIssueTableBody">
+        <tr>
+            <td colspan="8" style="text-align:center; padding:20px;">
+                Loading issues...
+            </td>
+        </tr>
+    </tbody>
+</table>
+</div>
 
-    <p><b>Expected Resolution:</b>
-        <?= date("d M Y", strtotime($row['expected_resolution_date'])) ?>
-    </p>
+<div id="pagination" class="pagination"></div>
+<!-- ================= ISSUE DETAIL MODAL ================= -->
+<div id="issueModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+        <span class="modal-close">&times;</span>
 
-    <div class="issue-actions">
-        <a href="resolve_issue.php?id=<?= $row['issue_id'] ?>">
-            <button>Resolve</button>
-        </a>
+        <h2 id="m_title"></h2>
+
+        <p><b>Department:</b> <span id="m_department"></span></p>
+        <p><b>Status:</b> <span id="m_status"></span></p>
+        <p><b>Urgency:</b> <span id="m_urgency"></span></p>
+        <p><b>Ward:</b> <span id="m_ward"></span></p>
+        <p><b>Date Reported:</b> <span id="m_reported"></span></p>
+        <p><b>Expected Resolution:</b> <span id="m_expected"></span></p>
+
+        <p id="m_description" class="modal-desc"></p>
+
+        <img
+            id="m_image"
+            class="modal-image"
+            style="display:none;"
+        >
     </div>
 </div>
-<?php } ?>
 
-<?php } elseif ($page === 'notifications') {
 
-    include "notifications.php";
 
-} ?>
+ <?php }?>
 
 </div>
 </div>
@@ -168,7 +205,6 @@ const urgencyData = [
 ];
 
 drawPieChart("statusChart", statusData);
-drawBarChart("urgencyChart", urgencyData);
 </script>
 <?php } ?>
 

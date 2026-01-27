@@ -18,7 +18,7 @@ session_start();
 
         <!-- Logo + Site Name -->
         <div style="display:flex;align-items:center;">
-            <img src="assets/images/logo.png" alt="Nepal Civic Logo" style="height:42px;margin-right:10px;">
+            <a href="index.php"><img src="assets/images/logo.png" alt="Nepal Civic Logo" style="height:42px;margin-right:10px;"></a>
             <span style="font-size:22px;font-weight:bold;">Nepal Civic</span>
         </div>
 

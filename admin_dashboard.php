@@ -64,6 +64,10 @@ $wardQ = mysqli_query($conn, "
 <head>
     <title>Admin Dashboard | Nepal Civic</title>
     <link rel="stylesheet" href="assets/style.css">
+    <script>
+        window.APP_ROLE = "admin";
+    </script>
+
     <script src="assets/main.js" defer></script>
 </head>
 <body>
@@ -87,10 +91,21 @@ $wardQ = mysqli_query($conn, "
 
 <h3 style="margin-top:30px;">Analytics</h3>
 
-<div class="dashboard-cards">
-    <div class="stat-card"><h3>Issues by Status</h3><canvas id="statusChart"></canvas></div>
-    <div class="stat-card"><h3>Issues by Department</h3><canvas id="deptChart"></canvas></div>
-    <div class="stat-card"><h3>Issues by Ward</h3><canvas id="wardChart"></canvas></div>
+<div class="analytics-vertical">
+    <div class="stat-card chart-card">
+        <h3>Issues by Status</h3>
+        <canvas id="statusChart"></canvas>
+    </div>
+
+    <div class="stat-card chart-card">
+        <h3>Issues by Department</h3>
+        <canvas id="deptChart"></canvas>
+    </div>
+
+    <div class="stat-card chart-card">
+        <h3>Issues by Ward</h3>
+        <canvas id="wardChart"></canvas>
+    </div>
 </div>
 
 <?php } elseif ($page === 'issues') { ?>
@@ -108,35 +123,86 @@ $issues = mysqli_query($conn, "
 
 <h2>Manage Issues</h2>
 
-<?php while ($row = mysqli_fetch_assoc($issues)) { ?>
-<div class="issue-card">
-    <h3><?= htmlspecialchars($row['title']) ?></h3>
-    <p><b>Citizen:</b> <?= htmlspecialchars($row['full_name']) ?></p>
-    <p><b>Ward:</b> Ward <?= $row['ward_no'] ?></p>
-    <p><b>Department:</b> <?= htmlspecialchars($row['department_name']) ?></p>
-    <p><b>Status:</b> <span class="status-<?= $row['status'] ?>"><?= ucfirst($row['status']) ?></span></p>
-    <p><b>Urgency:</b> <?= ucfirst($row['urgency_level'] ?? 'n/a') ?></p>
-    <p><?= nl2br(htmlspecialchars($row['description'])) ?></p>
+<div class="issue-filters">
+    <input type="text" id="filterTitle" placeholder="Search by title">
 
-    <?php if (!empty($row['photo_update'])) { ?>
-        <img src="uploads/issues/<?= htmlspecialchars($row['photo_update']) ?>" style="max-width:240px;border-radius:8px;">
-    <?php } ?>
+    <select id="filterDepartment">
+        <option value="">All Departments</option>
+        <?php
+        $dQ = mysqli_query($conn, "SELECT department_id, department_name FROM department");
+        while ($d = mysqli_fetch_assoc($dQ)) {
+            echo "<option value='{$d['department_id']}'>{$d['department_name']}</option>";
+        }
+        ?>
+    </select>
 
-    <div class="issue-actions">
-        <?php if ($row['status'] === 'pending') { ?>
-            <a href="approve_issue.php?id=<?= $row['issue_id'] ?>"><button>Approve</button></a>
-            <a href="reject_issue.php?id=<?= $row['issue_id'] ?>"><button>Reject</button></a>
-        <?php } ?>
-        <a href="generate_report.php?issue_id=<?= $row['issue_id'] ?>"><button>Generate PDF</button></a>
-    </div>
+    <select id="filterStatus">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="assigned">Assigned</option>
+        <option value="resolved">Resolved</option>
+        <option value="rejected">Rejected</option>
+    </select>
+
+    <select id="filterWard">
+        <option value="">All Wards</option>
+        <?php
+        $wQ = mysqli_query($conn, "SELECT ward_id, ward_no FROM ward ORDER BY ward_no");
+        while ($w = mysqli_fetch_assoc($wQ)) {
+            echo "<option value='{$w['ward_id']}'>Ward {$w['ward_no']}</option>";
+        }
+        ?>
+    </select>
 </div>
-<?php } ?>
+
+<div class="table-card">
+<table class="styled-table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Citizen</th>
+            <th>Ward</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>Urgency</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="issueTableBody"></tbody>
+</table>
+</div>
+
+<div id="pagination" class="pagination"></div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    if (typeof USER_ROLE === "undefined") return;
+    if (USER_ROLE !== "admin") return;
+
+    // Force-init admin issue table
+    if (document.getElementById("issueTableBody")) {
+        // small delay to ensure main.js is loaded
+        setTimeout(() => {
+            if (typeof window.initIssueTable === "function") {
+                window.initIssueTable();
+            }
+        }, 0);
+    }
+});
+</script>
+
 
 <?php } elseif ($page === 'staff') { ?>
 
 <?php
 $staffQ = mysqli_query($conn, "
-    SELECT ward_staff.*, ward.ward_no
+    SELECT 
+        ward_staff.staff_id,
+        ward_staff.full_name,
+        ward_staff.email,
+        ward_staff.designation,
+        ward_staff.first_login,
+        ward.ward_no
     FROM ward_staff
     JOIN ward ON ward_staff.ward_id = ward.ward_id
     ORDER BY ward.ward_no
@@ -145,7 +211,9 @@ $staffQ = mysqli_query($conn, "
 
 <h2>Manage Ward Staff</h2>
 
-<a href="create_staff.php"><button style="margin-bottom:15px;">+ Create Staff</button></a>
+<a href="create_staff.php">
+    <button style="margin-bottom:15px;">+ Create Staff</button>
+</a>
 
 <table class="data-table">
 <thead>
@@ -155,9 +223,17 @@ $staffQ = mysqli_query($conn, "
     <th>Designation</th>
     <th>Ward</th>
     <th>First Login</th>
+    <th>Action</th>
 </tr>
 </thead>
 <tbody>
+
+<?php if (mysqli_num_rows($staffQ) === 0) { ?>
+<tr>
+    <td colspan="6" style="text-align:center;">No staff found.</td>
+</tr>
+<?php } ?>
+
 <?php while ($s = mysqli_fetch_assoc($staffQ)) { ?>
 <tr>
     <td><?= htmlspecialchars($s['full_name']) ?></td>
@@ -165,16 +241,28 @@ $staffQ = mysqli_query($conn, "
     <td><?= htmlspecialchars($s['designation']) ?></td>
     <td>Ward <?= $s['ward_no'] ?></td>
     <td><?= $s['first_login'] == 0 ? '✔ Changed' : '✖ Pending' ?></td>
+    <td>
+        <a 
+          href="delete_user.php?type=staff&id=<?= $s['staff_id'] ?>"
+          onclick="return confirm('Are you sure you want to delete this staff member?');"
+          style="color:red;font-weight:bold;"
+        >
+            Delete
+        </a>
+    </td>
 </tr>
 <?php } ?>
+
 </tbody>
 </table>
+
 
 <?php } elseif ($page === 'citizens') { ?>
 
 <?php
 $citizenQ = mysqli_query($conn, "
     SELECT 
+        citizen.citizen_id,
         citizen.full_name,
         citizen.email,
         citizen.address,
@@ -183,6 +271,7 @@ $citizenQ = mysqli_query($conn, "
         citizen.date_registered
     FROM citizen
     JOIN ward ON citizen.ward_id = ward.ward_id
+    WHERE citizen.is_active = 1
     ORDER BY citizen.date_registered DESC
 ");
 ?>
@@ -198,12 +287,13 @@ $citizenQ = mysqli_query($conn, "
     <th>Citizenship No.</th>
     <th>Ward</th>
     <th>Registered On</th>
+    <th>Action</th>
 </tr>
 </thead>
 <tbody>
 
 <?php if (mysqli_num_rows($citizenQ) === 0) { ?>
-<tr><td colspan="6" style="text-align:center;">No citizens found.</td></tr>
+<tr><td colspan="7" style="text-align:center;">No citizens found.</td></tr>
 <?php } ?>
 
 <?php while ($c = mysqli_fetch_assoc($citizenQ)) { ?>
@@ -214,19 +304,19 @@ $citizenQ = mysqli_query($conn, "
     <td><?= htmlspecialchars($c['national_id']) ?></td>
     <td>Ward <?= $c['ward_no'] ?></td>
     <td><?= date("d M Y", strtotime($c['date_registered'])) ?></td>
+    <td>
+       <a href="delete_user.php?type=citizen&id=<?= $c['citizen_id'] ?>"
+
+           onclick="return confirm('Are you sure you want to delete this citizen?');"
+           style="color:red;font-weight:bold;">
+            Delete
+        </a>
+    </td>
 </tr>
 <?php } ?>
 
 </tbody>
 </table>
-
-<?php } elseif ($page === 'notifications') {
-
-    include "notifications.php";
-
-} else { ?>
-
-<p>Invalid page requested.</p>
 
 <?php } ?>
 
@@ -243,6 +333,8 @@ const wardData = [<?php while ($w = mysqli_fetch_assoc($wardQ)) echo "{label:'{$
 ?>];
 </script>
 <?php } ?>
+
+
 
 </body>
 </html>

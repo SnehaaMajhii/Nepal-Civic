@@ -68,6 +68,10 @@ $deptQ = mysqli_query($conn, "
 <head>
     <title>Citizen Dashboard | Nepal Civic</title>
     <link rel="stylesheet" href="assets/style.css">
+    <script>
+        window.APP_ROLE = "citizen";
+    </script>
+
     <script src="assets/main.js" defer></script>
 </head>
 <body>
@@ -107,19 +111,23 @@ $deptQ = mysqli_query($conn, "
     </div>
 
     <!-- ================= ANALYTICS ================= -->
-    <h3 style="margin-top:30px;">Analytics</h3>
+<h3 style="margin-top:30px;">Analytics</h3>
 
-    <div class="dashboard-cards">
-        <div class="stat-card">
-            <h3>Issues by Status</h3>
-            <canvas id="statusChart"></canvas>
-        </div>
+<div class="analytics-stack">
 
-        <div class="stat-card">
-            <h3>Issues by Department</h3>
-            <canvas id="deptChart"></canvas>
-        </div>
+    <div class="stat-card chart-card">
+        <h3>Issues by Status</h3>
+        <canvas id="statusChart"></canvas>
     </div>
+    <br>
+
+    <br><div class="stat-card chart-card">
+        <h3>Issues by Department</h3>
+        <canvas id="deptChart"></canvas>
+    </div>
+
+</div>
+
 
 <?php } elseif ($page === 'report') { ?>
 

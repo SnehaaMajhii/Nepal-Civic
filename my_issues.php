@@ -1,82 +1,112 @@
 <?php
-// INCLUDED inside citizen_dashboard.php
+// ===============================
+// MY ISSUES – CITIZEN VIEW
+// ===============================
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require "includes/db.php";
 
 $citizen_id = (int) $_SESSION['citizen_id'];
-
-$issues = mysqli_query($conn, "
-    SELECT 
-        issue.*,
-        department.department_name
-    FROM issue
-    JOIN department ON issue.department_id = department.department_id
-    WHERE issue.citizen_id = $citizen_id
-    ORDER BY issue.date_reported DESC
-");
 ?>
 
 <h2>My Reported Issues</h2>
 
-<?php if (mysqli_num_rows($issues) === 0) { ?>
-    <div class="empty-state">
-        You have not reported any issues yet.
-    </div>
-<?php } ?>
+<!-- ===============================
+     ISSUE FILTERS
+=============================== -->
+<div class="issue-filters">
+    <input
+        type="text"
+        id="searchTitle"
+        placeholder="Search by title"
+    >
 
-<?php while ($row = mysqli_fetch_assoc($issues)) { ?>
-
-    <?php
-        // -----------------------------
-        // Reminder visibility logic
-        // -----------------------------
-        $canSendReminder = false;
-
-        if (
-            !empty($row['expected_resolution_date']) &&
-            in_array($row['status'], ['pending', 'assigned']) &&
-            strtotime($row['expected_resolution_date']) < strtotime(date('Y-m-d')) &&
-            (
-                empty($row['last_reminder_sent_at']) ||
-                date('Y-m-d', strtotime($row['last_reminder_sent_at'])) < date('Y-m-d')
-            )
-        ) {
-            $canSendReminder = true;
+    <select id="filterDepartment">
+        <option value="">All Departments</option>
+        <?php
+        $deptQ = mysqli_query($conn, "SELECT department_id, department_name FROM department");
+        while ($d = mysqli_fetch_assoc($deptQ)) {
+            echo "<option value='{$d['department_id']}'>{$d['department_name']}</option>";
         }
-    ?>
+        ?>
+    </select>
+    <select id="filterWard">
+        <option value="">All Wards</option>
+        <?php
+        $wardQ = mysqli_query($conn, "SELECT DISTINCT ward_id FROM issue ORDER BY ward_id");
+        while ($w = mysqli_fetch_assoc($wardQ)) {
+            echo "<option value='{$w['ward_id']}'>Ward {$w['ward_id']}</option>";
+        }
+        ?>
+    </select>
 
-    <div class="issue-card">
 
-        <h3><?= htmlspecialchars($row['title']); ?></h3>
+    <select id="filterStatus">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="assigned">Assigned</option>
+        <option value="resolved">Resolved</option>
+        <option value="rejected">Rejected</option>
+    </select>
+</div>
 
-        <p>
-            <b>Department:</b>
-            <?= htmlspecialchars($row['department_name']); ?>
-        </p>
+<!-- ===============================
+     ISSUE TABLE
+=============================== -->
+<div class="table-card">
+    <table class="styled-table issue-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Department</th>
+                <th>Ward</th>
+                <th>Status</th>
+                <th>Expected Resolution</th>
+            </tr>
+        </thead>
 
-        <p>
-            <b>Status:</b>
-            <span class="status-<?= $row['status']; ?>">
-                <?= ucfirst($row['status']); ?>
-            </span>
-        </p>
+        <!-- IMPORTANT: tbody is EMPTY (AJAX FILLS THIS) -->
+        <tbody id="issuesTableBody">
+            <tr>
+                <td colspan="6" style="text-align:center; padding:20px;">
+                    Loading issues...
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
-        <?php if (!empty($row['expected_resolution_date'])) { ?>
-            <p>
-                <b>Expected Resolution:</b>
-                <?= date("d M Y", strtotime($row['expected_resolution_date'])); ?>
-            </p>
-        <?php } ?>
+<!-- ===============================
+     PAGINATION
+=============================== -->
+<div id="pagination" class="pagination"></div>
 
-        <p><?= nl2br(htmlspecialchars($row['description'])); ?></p>
+<!-- ===============================
+     ISSUE DETAIL MODAL
+=============================== -->
+<div id="issueModal" class="modal-overlay">
+    <div class="modal-box">
+        <span class="modal-close">&times;</span>
 
-        <!-- ================= REMINDER BUTTON ================= -->
-        <?php if ($canSendReminder) { ?>
-            <div class="issue-actions">
-                <a href="send_reminder.php?issue_id=<?= $row['issue_id']; ?>">
-                    <button>Send Reminder</button>
-                </a>
-            </div>
-        <?php } ?>
+        <h2 id="m_title"></h2>
 
+        <p><b>Department:</b> <span id="m_department"></span></p>
+        <p><b>Status:</b> <span id="m_status"></span></p>
+        <p><b>Ward:</b> <span id="m_ward"></span></p>
+        <p><b>Date Reported:</b> <span id="m_reported"></span></p>
+        <p><b>Expected Resolution:</b> <span id="m_expected"></span></p>
+
+        <p id="m_description" class="modal-desc"></p>
+
+        <img
+            id="m_image"
+            class="modal-image"
+            alt="Issue Image"
+            style="display:none;"
+        >
     </div>
-
-<?php } ?>
+</div>

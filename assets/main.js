@@ -1,5 +1,5 @@
 /* =========================
-   HELPER FUNCTIONS
+   HELPER
 ========================= */
 function $(id) {
     return document.getElementById(id);
@@ -10,49 +10,34 @@ function $(id) {
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
 
-    /* LOGIN FORM */
     const loginForm = $("loginForm");
     if (loginForm) {
-        loginForm.addEventListener("submit", function (e) {
-            const email = $("email");
-            const password = $("password");
-
-            if (!email.value || !password.value) {
+        loginForm.addEventListener("submit", e => {
+            if (!$("email").value || !$("password").value) {
                 alert("Please fill in all fields.");
                 e.preventDefault();
             }
         });
     }
 
-    /* REGISTER FORM */
     const registerForm = $("registerForm");
     if (registerForm) {
-        registerForm.addEventListener("submit", function (e) {
-            const email = $("email");
-            const password = $("password");
-            const ward = $("ward_id");
-
-            if (!email.value || !password.value || !ward.value) {
+        registerForm.addEventListener("submit", e => {
+            if (!$("email").value || !$("password").value || !$("ward_id").value) {
                 alert("All required fields must be filled.");
                 e.preventDefault();
             }
-
-            if (password.value.length < 6) {
+            if ($("password").value.length < 6) {
                 alert("Password must be at least 6 characters.");
                 e.preventDefault();
             }
         });
     }
 
-    /* REPORT ISSUE FORM */
     const issueForm = $("issueForm");
     if (issueForm) {
-        issueForm.addEventListener("submit", function (e) {
-            const title = $("title");
-            const department = $("department_id");
-            const description = $("description");
-
-            if (!title.value || !department.value || !description.value) {
+        issueForm.addEventListener("submit", e => {
+            if (!$("title").value || !$("department_id").value || !$("description").value) {
                 alert("Please complete all issue details.");
                 e.preventDefault();
             }
@@ -61,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================
-   SIDEBAR ACTIVE LINK (FIXED)
+   SIDEBAR ACTIVE LINK
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
     const links = document.querySelectorAll(".sidebar a");
@@ -69,137 +54,78 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentPage = params.get("page") || "dashboard";
 
     links.forEach(link => {
-        // FIX: Ignore the logout link specifically
         if (link.href.includes("logout.php")) return;
 
-        const linkURL = new URL(link.href, window.location.origin);
-        const linkPage = linkURL.searchParams.get("page") || "dashboard";
-
-        if (linkPage === currentPage) {
-            link.classList.add("active");
-        }
+        const linkPage = new URL(link.href).searchParams.get("page") || "dashboard";
+        if (linkPage === currentPage) link.classList.add("active");
     });
 });
 
 /* =========================
-   SIMPLE HOVER EFFECTS
+   SIMPLE HOVER EFFECT
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".issue-card").forEach(card => {
-        card.addEventListener("mouseenter", () => {
-            card.style.transform = "translateY(-3px)";
-        });
-
-        card.addEventListener("mouseleave", () => {
-            card.style.transform = "translateY(0)";
-        });
+        card.onmouseenter = () => card.style.transform = "translateY(-3px)";
+        card.onmouseleave = () => card.style.transform = "translateY(0)";
     });
 });
 
 /* =========================
-   CHART FUNCTIONS (ADMIN) - FIXED
+   CHART FUNCTIONS
 ========================= */
-
-/* BAR CHART (Department / Ward) */
 function drawBarChart(canvasId, dataArr) {
     const canvas = document.getElementById(canvasId);
-    // Check if dataArr is valid and has items
     if (!canvas || !dataArr || dataArr.length === 0) return;
 
-    // Use the array directly
-    const data = dataArr;
-
     const ctx = canvas.getContext("2d");
-    // Ensure scaling is correct
-    canvas.width = 380;
-    canvas.height = Math.max(260, data.length * 60);
+    canvas.width = 700;
+    canvas.height = 280;
 
-
-    // Calculate max value for dynamic height scaling
-    const maxValue = Math.max(...data.map(d => d.value), 1);
-    const barWidth = 28;
-    const gap = 18;
+    const maxValue = Math.max(...dataArr.map(d => d.value), 1);
+    const barWidth = 60;
+    const gap = 60;
+    const totalWidth = dataArr.length * barWidth + (dataArr.length - 1) * gap;
+    const startX = (canvas.width - totalWidth) / 2;
+    const baseY = canvas.height - 50;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    data.forEach((item, index) => {
-        // Calculate dynamic height
-        const barHeight = (item.value / maxValue) * 150;
-        
-        const x = 40 + index * (barWidth + gap);
-        const y = canvas.height - barHeight - 35;
+    dataArr.forEach((item, i) => {
+        const h = (item.value / maxValue) * 150;
+        const x = startX + i * (barWidth + gap);
+        const y = baseY - h;
 
-        // Draw Bar
         ctx.fillStyle = "#0b3c91";
-        ctx.fillRect(x, y, barWidth, barHeight);
-
-        // Draw Label and Value
-        ctx.fillStyle = "#333";
-        ctx.font = "11px Arial";
-        
-        // item.label comes directly from the PHP array now
-        wrapText(ctx, item.label, x + barWidth / 2, canvas.height - 12, barWidth + 40, 12);
-        ctx.fillText(item.value, x + 6, y - 6);
-    });
-}
-// Helper function to wrap text within a given width
-function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
-    const words = text.split(" ");
-    let line = "";
-    let lines = [];
-
-    words.forEach(word => {
-        const testLine = line + word + " ";
-        if (ctx.measureText(testLine).width > maxWidth && line !== "") {
-            lines.push(line);
-            line = word + " ";
-        } else {
-            line = testLine;
-        }
-    });
-    lines.push(line);
-
-    lines.forEach((l, i) => {
+        ctx.fillRect(x, y, barWidth, h);
+        ctx.fillStyle = "#000";
         ctx.textAlign = "center";
-        ctx.fillText(l, x, y + (i * lineHeight));
+        ctx.fillText(item.value, x + barWidth / 2, y - 8);
+        ctx.fillText(item.label, x + barWidth / 2, baseY + 18);
     });
 }
 
-
-/* PIE CHART (Status) */
 function drawPieChart(canvasId, dataArr) {
     const canvas = document.getElementById(canvasId);
     if (!canvas || !dataArr || dataArr.length === 0) return;
 
-    // Use the array directly
-    const data = dataArr;
-
     const ctx = canvas.getContext("2d");
-    canvas.width = 220;
-    canvas.height = 220;
+    canvas.width = 360;
+    canvas.height = 360;
 
-    const total = data.reduce((sum, d) => sum + d.value, 0);
-    let startAngle = 0;
+    const total = dataArr.reduce((s, d) => s + d.value, 0);
+    let angle = -Math.PI / 2;
+    const colors = ["#fb8c00", "#1e88e5", "#43a047", "#e53935"];
 
-    // Colors: Pending(orange), Assigned(blue), Resolved(green), Rejected(red)
-    const colors = ["orange", "#0b3c91", "green", "red"];
-
-    data.forEach((item, index) => {
-        // Avoid dividing by zero
-        if (total === 0) return;
-
-        const sliceAngle = (item.value / total) * Math.PI * 2;
-
+    dataArr.forEach((d, i) => {
+        const slice = (d.value / total) * Math.PI * 2;
         ctx.beginPath();
-        // Center (110,110) Radius (90)
-        ctx.moveTo(110, 110);
-        ctx.arc(110, 110, 90, startAngle, startAngle + sliceAngle);
+        ctx.moveTo(180, 180);
+        ctx.arc(180, 180, 140, angle, angle + slice);
         ctx.closePath();
-
-        ctx.fillStyle = colors[index % colors.length];
+        ctx.fillStyle = colors[i % colors.length];
         ctx.fill();
-
-        startAngle += sliceAngle;
+        angle += slice;
     });
 }
 
@@ -207,16 +133,289 @@ function drawPieChart(canvasId, dataArr) {
    INIT CHARTS
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
-    // Check if the variables exist (they are defined in the PHP footer)
-    if (typeof statusData !== "undefined") {
-        drawPieChart("statusChart", statusData);
+    if (typeof statusData !== "undefined") drawPieChart("statusChart", statusData);
+    if (typeof deptData !== "undefined") drawBarChart("deptChart", deptData);
+    if (typeof wardData !== "undefined") drawBarChart("wardChart", wardData);
+});
+
+/* =====================================================
+   ISSUE LIST + FILTER + PAGINATION (ADMIN & CITIZEN)
+===================================================== */
+
+function initIssueTable(tableBody, pagination) {
+
+    const MODE = window.APP_ROLE || "citizen";
+    const isAdmin = MODE === "admin";
+
+    function loadIssues(page = 1) {
+
+        const title =
+            document.getElementById("filterTitle")?.value ||
+            document.getElementById("searchTitle")?.value ||
+            "";
+
+        const department = document.getElementById("filterDepartment")?.value || "";
+        const status = document.getElementById("filterStatus")?.value || "";
+        const ward = document.getElementById("filterWard")?.value || "";
+
+        fetch(`fetch_issue.php?action=list&mode=${MODE}&page=${page}&title=${title}&department=${department}&status=${status}&ward=${ward}`)
+            .then(res => res.json())
+            .then(res => {
+                renderTable(res.data || []);
+                renderPagination(res.totalPages || 0, res.currentPage || 1);
+            });
     }
 
-    if (typeof deptData !== "undefined") {
-        drawBarChart("deptChart", deptData);
+    function renderTable(data) {
+        tableBody.innerHTML = "";
+
+        if (!data.length) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="${isAdmin ? 8 : 6}" style="text-align:center;">
+                        No issues found
+                    </td>
+                </tr>`;
+            pagination.innerHTML = "";
+            return;
+        }
+
+        data.forEach(row => {
+            tableBody.innerHTML += isAdmin ? `
+            <tr class="issue-row" data-id="${row.issue_id}">
+                <td>${row.sr}</td>
+                <td>${row.title}</td>
+                <td>${row.full_name || "-"}</td>
+                <td>Ward ${row.ward_no}</td>
+                <td>${row.department_name}</td>
+                <td class="status-${row.status}">${row.status}</td>
+                <td>${row.urgency_level || "-"}</td>
+                <td>
+                    ${row.status === "pending" ? `
+                        <a href="approve_issue.php?id=${row.issue_id}"><button>Approve</button></a>
+                        <a href="reject_issue.php?id=${row.issue_id}"><button>Reject</button></a>
+                    ` : ""}
+                    <a href="generate_report.php?issue_id=${row.issue_id}">
+                        <button>PDF</button>
+                    </a>
+                </td>
+            </tr>` : `
+            <tr class="issue-row" data-id="${row.issue_id}">
+                <td>${row.sr}</td>
+                <td>${row.title}</td>
+                <td>${row.department_name}</td>
+                <td>Ward ${row.ward_no}</td>
+                <td class="status-${row.status}">${row.status}</td>
+                <td>${row.expected_resolution_date || "-"}</td>
+            </tr>`;
+        });
+
+        bindRowClicks();
     }
 
-    if (typeof wardData !== "undefined") {
-        drawBarChart("wardChart", wardData);
+    function renderPagination(total, current) {
+        pagination.innerHTML = "";
+        for (let i = 1; i <= total; i++) {
+            const btn = document.createElement("button");
+            btn.textContent = i;
+            if (i === current) btn.classList.add("active");
+            btn.onclick = () => loadIssues(i);
+            pagination.appendChild(btn);
+        }
     }
+
+    function bindRowClicks() {
+        document.querySelectorAll(".issue-row").forEach(row => {
+            row.onclick = e => {
+                if (e.target.closest("button") || e.target.closest("a")) return;
+                openModal(row.dataset.id);
+            };
+        });
+    }
+
+    function openModal(id) {
+        fetch(`fetch_issue.php?action=detail&mode=${MODE}&id=${id}`)
+            .then(res => res.json())
+            .then(d => {
+                $("m_title").textContent = d.title;
+                $("m_department").textContent = d.department_name;
+                $("m_status").textContent = d.status;
+                $("m_urgency") && ($("m_urgency").textContent = d.urgency_level || "-");
+                $("m_ward").textContent = "Ward " + d.ward_no;
+                $("m_reported").textContent = d.date_reported;
+                $("m_expected").textContent = d.expected_resolution_date || "-";
+                $("m_description").textContent = d.description;
+
+                const img = $("m_image");
+                if (d.photo_update) {
+                    img.src = "uploads/issues/" + d.photo_update;
+                    img.style.display = "block";
+                } else {
+                    img.style.display = "none";
+                }
+
+                $("issueModal").style.display = "flex";
+            });
+    }
+
+    document.getElementById("filterTitle")?.addEventListener("keyup", () => loadIssues(1));
+    document.getElementById("searchTitle")?.addEventListener("keyup", () => loadIssues(1));
+    document.getElementById("filterDepartment")?.addEventListener("change", () => loadIssues(1));
+    document.getElementById("filterStatus")?.addEventListener("change", () => loadIssues(1));
+    document.getElementById("filterWard")?.addEventListener("change", () => loadIssues(1));
+
+    loadIssues();
+}
+
+/* =========================
+   WAIT FOR TABLE (ADMIN FIX)
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+
+    function waitForIssueTable() {
+        const tableBody =
+            document.getElementById("issueTableBody") ||
+            document.getElementById("issuesTableBody");
+        const pagination = document.getElementById("pagination");
+
+        if (!tableBody || !pagination) {
+            setTimeout(waitForIssueTable, 50);
+            return;
+        }
+
+        initIssueTable(tableBody, pagination);
+    }
+
+    waitForIssueTable();
+});
+
+
+/* =====================================================
+   STAFF ASSIGNED ISSUES – TABLE
+===================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+
+    const tbody = document.getElementById("staffIssueTableBody");
+    const pagination = document.getElementById("pagination");
+
+    // 🚫 If not staff page → do nothing
+    if (!tbody || !pagination) return;
+
+    function loadStaffIssues(page = 1) {
+
+    const title = document.getElementById("staffSearchTitle")?.value || "";
+    const department = document.getElementById("staffFilterDepartment")?.value || "";
+    const statusFilter = document.getElementById("staffFilterStatus")?.value || "";
+
+    fetch(
+        `fetch_issue.php?action=staff_list&mode=staff&page=${page}` +
+        `&title=${encodeURIComponent(title)}` +
+        `&department=${encodeURIComponent(department)}` +
+        `&status=${encodeURIComponent(statusFilter)}`
+    )
+        .then(res => res.json())
+        .then(res => {
+
+            const tbody = document.getElementById("staffIssueTableBody");
+            const pagination = document.getElementById("pagination");
+
+            if (!tbody || !pagination) return;
+
+            tbody.innerHTML = "";
+
+            if (!res.data || res.data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align:center;">
+                            No issues found
+                        </td>
+                    </tr>`;
+                pagination.innerHTML = "";
+                return;
+            }
+
+            res.data.forEach(row => {
+                tbody.innerHTML += `
+                <tr class="staff-issue-row" data-id="${row.issue_id}">
+                    <td>${row.sr}</td>
+                    <td>${row.title}</td>
+                    <td>${row.full_name}</td>
+                    <td>${row.department_name || "-"}</td>
+                    <td>
+                        <span class="urgency-${row.urgency_level}">
+                            ${row.urgency_level}
+                        </span>
+                    </td>
+                    <td>${row.expected_resolution_date || "-"}</td>
+                    <td>${row.date_reported}</td>
+                    <td>
+                        ${row.status === "assigned" ? `
+                            <a href="resolve_issue.php?id=${row.issue_id}">
+                                <button>Resolve</button>
+                            </a>
+                        ` : `<span class="status-resolved">Resolved</span>`}
+                    </td>
+                </tr>`;
+            });
+
+            renderPagination(res.totalPages, res.currentPage, loadStaffIssues);
+            bindStaffRowClicks();
+        })
+        .catch(err => {
+            console.error("Staff issue load failed:", err);
+        });
+}
+
+
+    function renderPagination(total, current) {
+        pagination.innerHTML = "";
+        for (let i = 1; i <= total; i++) {
+            const btn = document.createElement("button");
+            btn.textContent = i;
+            if (i === current) btn.classList.add("active");
+            btn.onclick = () => loadStaffIssues(i);
+            pagination.appendChild(btn);
+        }
+    }
+
+   function bindRowClicks() {
+    document.querySelectorAll(".issue-row").forEach(row => {
+        row.onclick = e => {
+
+            // 🚫 Ignore clicks on buttons or links
+            if (e.target.closest("button") || e.target.closest("a")) return;
+
+            openModal(row.dataset.id);
+        };
+    });
+}
+
+
+
+        // ===============================
+    // MODAL CLOSE (GLOBAL – ALL ROLES)
+    // ===============================
+    document.querySelector(".modal-close")?.addEventListener("click", () => {
+        document.getElementById("issueModal").style.display = "none";
+    });
+
+    window.addEventListener("click", e => {
+        const modal = document.getElementById("issueModal");
+        if (e.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+
+    document.getElementById("staffSearchTitle")
+    ?.addEventListener("keyup", () => loadStaffIssues(1));
+
+    document.getElementById("staffFilterDepartment")
+    ?.addEventListener("change", () => loadStaffIssues(1));
+
+    document.getElementById("staffFilterStatus")
+    ?.addEventListener("change", () => loadStaffIssues(1));
+
+
+
+    loadStaffIssues();
 });

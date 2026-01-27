@@ -15,7 +15,7 @@ session_start();
 <header style="background:#c4161c;color:#fff;padding:15px 0;">
     <div style="max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:0 15px;">
         <div style="display:flex;align-items:center;">
-            <img src="assets/images/logo.png" alt="Nepal Civic Logo" style="height:42px;margin-right:10px;">
+            <a href="index.php"><img src="assets/images/logo.png" alt="Nepal Civic Logo" style="height:42px;margin-right:10px;"></a>
             <span style="font-size:22px;font-weight:bold;">Nepal Civic</span>
         </div>
 

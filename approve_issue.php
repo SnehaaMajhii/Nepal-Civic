@@ -97,6 +97,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 NOW()
             )
         ");
+        /* ======================
+   NOTIFY STAFF (WARD + DEPARTMENT)
+====================== */
+
+/* Get ward & department of issue */
+$issueDetails = mysqli_fetch_assoc(mysqli_query($conn, "
+    SELECT ward_id, department_id
+    FROM issue
+    WHERE issue_id = $issue_id
+"));
+
+$ward_id = (int) $issueDetails['ward_id'];
+$department_id = (int) $issueDetails['department_id'];
+
+/* Get matching staff */
+$staffs = mysqli_query($conn, "
+    SELECT staff_id
+    FROM ward_staff
+    WHERE ward_id = $ward_id
+      AND department_id = $department_id
+");
+
+/* Notify staff */
+while ($s = mysqli_fetch_assoc($staffs)) {
+
+    $staff_id = (int) $s['staff_id'];
+
+    mysqli_query($conn, "
+        INSERT INTO notification
+        (staff_id, message, issue_id, is_read, date_sent)
+        VALUES
+        (
+            $staff_id,
+            'A new issue has been approved and assigned to your ward',
+            $issue_id,
+            0,
+            NOW()
+        )
+    ");
+}
 
         header("Location: admin_dashboard.php?page=issues");
         exit();

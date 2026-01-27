@@ -60,7 +60,7 @@ $issueQ = mysqli_query($conn, "
     VALUES
     (
         'Reminder sent by citizen for Issue #$issue_id.',
-        $admin_id,
+        admin_id,
         0,
         NOW()
     )
